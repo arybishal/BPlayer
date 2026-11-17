@@ -20,7 +20,7 @@ val Context.pulseDataStore: DataStore<Preferences> by preferencesDataStore(name 
 @Singleton
 class PreferencesManager @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+) : RecognitionPreferences {
     companion object {
         val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         val KEY_FONT_SCALE = floatPreferencesKey("font_scale")
@@ -46,7 +46,7 @@ class PreferencesManager @Inject constructor(
         prefs[KEY_GEMINI_API_KEY] ?: ""
     }
 
-    val auddApiKeyFlow: Flow<String> = context.pulseDataStore.data.map { prefs ->
+    override val auddApiKeyFlow: Flow<String> = context.pulseDataStore.data.map { prefs ->
         prefs[KEY_AUDD_API_KEY] ?: ""
     }
 

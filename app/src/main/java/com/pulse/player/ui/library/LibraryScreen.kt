@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Hearing
 import androidx.compose.material.icons.rounded.MusicOff
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AlertDialog
@@ -74,6 +75,7 @@ import com.pulse.player.ui.components.PermissionRationaleCard
 import com.pulse.player.ui.components.PlaylistItemRow
 import com.pulse.player.ui.components.SongActionsSheet
 import com.pulse.player.ui.components.TrackItemRow
+import com.pulse.player.ui.recognition.SongRecognitionSheet
 import com.pulse.player.ui.theme.LocalExtendedColors
 import kotlinx.coroutines.launch
 
@@ -92,6 +94,7 @@ fun LibraryScreen(
     var selectedTrackForActions by remember { mutableStateOf<com.pulse.player.domain.model.Track?>(null) }
     var showCreatePlaylistDialog by remember { mutableStateOf(false) }
     var newPlaylistName by remember { mutableStateOf("") }
+    var showRecognitionSheet by remember { mutableStateOf(false) }
 
     val permissionToRequest = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -147,6 +150,18 @@ fun LibraryScreen(
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Song Recognition ("What's this song?")
+                IconButton(
+                    onClick = { showRecognitionSheet = true },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Hearing,
+                        contentDescription = "Identify Song",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
                 // Refresh / Scan
                 IconButton(
                     onClick = { viewModel.triggerLibraryScan() },
@@ -517,6 +532,15 @@ fun LibraryScreen(
                 viewModel.createPlaylist(name)
             },
             onDeleteRequest = { viewModel.deleteTrack(it) }
+        )
+    }
+
+    if (showRecognitionSheet) {
+        SongRecognitionSheet(
+            onDismiss = { showRecognitionSheet = false },
+            onPlayTrack = { track ->
+                onTrackClick(track, listOf(track))
+            }
         )
     }
 }

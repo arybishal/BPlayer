@@ -1,5 +1,6 @@
 package com.pulse.player.di
 
+import com.pulse.player.data.remote.audd.AuddApi
 import com.pulse.player.data.remote.lrclib.LrclibApi
 import dagger.Module
 import dagger.Provides
@@ -52,5 +53,20 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(LrclibApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuddApi(
+        okHttpClient: OkHttpClient,
+        json: Json
+    ): AuddApi {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.audd.io/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(AuddApi::class.java)
     }
 }

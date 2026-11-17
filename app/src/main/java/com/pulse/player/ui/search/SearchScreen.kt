@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Hearing
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +42,7 @@ import com.pulse.player.ui.components.AlbumGridCard
 import com.pulse.player.ui.components.ArtistGridCard
 import com.pulse.player.ui.components.SongActionsSheet
 import com.pulse.player.ui.components.TrackItemRow
+import com.pulse.player.ui.recognition.SongRecognitionSheet
 import com.pulse.player.ui.theme.LocalExtendedColors
 
 @Composable
@@ -54,6 +56,7 @@ fun SearchScreen(
     val state by viewModel.uiState.collectAsState()
     val extendedColors = LocalExtendedColors.current
     var selectedTrackForActions by remember { mutableStateOf<Track?>(null) }
+    var showRecognitionSheet by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -98,6 +101,17 @@ fun SearchScreen(
                             imageVector = Icons.Rounded.Close,
                             contentDescription = "Clear Search",
                             tint = extendedColors.onSurfaceMuted
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = { showRecognitionSheet = true },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Hearing,
+                            contentDescription = "Identify Song",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -226,6 +240,18 @@ fun SearchScreen(
             onAddToPlaylist = { playlist, t -> viewModel.addTrackToPlaylist(playlist.id, t.id) },
             onCreatePlaylistAndAdd = { name, t -> viewModel.createPlaylist(name, t.id) },
             onDeleteRequest = { viewModel.deleteTrack(it) }
+        )
+    }
+
+    if (showRecognitionSheet) {
+        SongRecognitionSheet(
+            onDismiss = { showRecognitionSheet = false },
+            onPlayTrack = { track ->
+                onTrackClick(track, listOf(track))
+            },
+            onSearchLibrary = { query ->
+                viewModel.onQueryChange(query)
+            }
         )
     }
 }

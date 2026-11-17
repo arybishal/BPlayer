@@ -151,11 +151,11 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 10. Milestone 10: Acoustic Song Recognition (M10)
-- [ ] Implement `RECORD_AUDIO` permission request with transparent rationale screen.
-- [ ] Build 10-second microphone audio capture pipeline into memory buffer.
-- [ ] Integrate AudD / ACRCloud API client with user-configured API token.
-- [ ] Design animated circular waveform listening UI in accent color (no blue gradients).
-- [ ] Build Match Result card with quick library search and web lookup actions.
+- [x] Implement `RECORD_AUDIO` permission request with transparent rationale screen.
+- [x] Build 10-second microphone audio capture pipeline into memory buffer.
+- [x] Integrate AudD / ACRCloud API client with user-configured API token.
+- [x] Design animated circular waveform listening UI in accent color (no blue gradients).
+- [x] Build Match Result card with quick library search and web lookup actions.
 
 ---
 
