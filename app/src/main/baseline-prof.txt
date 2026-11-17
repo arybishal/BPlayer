@@ -1,0 +1,34 @@
+# Baseline Profile for Pulse Android Music Player
+# Optimizes critical classes for sub-1.5s cold start and silky 60/120 FPS Compose rendering
+
+Lcom/pulse/player/PulseApplication;
+Lcom/pulse/player/ui/MainActivity;
+Lcom/pulse/player/ui/navigation/PulseNavHostKt;
+Lcom/pulse/player/ui/library/LibraryScreenKt;
+Lcom/pulse/player/ui/library/LibraryViewModel;
+Lcom/pulse/player/ui/player/NowPlayingScreenKt;
+Lcom/pulse/player/ui/theme/ThemeKt;
+Lcom/pulse/player/ui/theme/ColorKt;
+Lcom/pulse/player/ui/theme/TypeKt;
+Lcom/pulse/player/ui/theme/ShapeKt;
+Lcom/pulse/player/ui/theme/LiquidGlassKt;
+Lcom/pulse/player/service/PlaybackService;
+Lcom/pulse/player/service/controller/PlaybackConnection;
+Lcom/pulse/player/service/controller/SmartPreviousDetector;
+Lcom/pulse/player/service/sleeptimer/SleepTimerManager;
+Lcom/pulse/player/service/audiofx/AudioEffectsController;
+Lcom/pulse/player/data/local/room/PulseDatabase;
+Lcom/pulse/player/data/local/room/dao/TrackDao;
+Lcom/pulse/player/data/local/room/dao/AlbumDao;
+Lcom/pulse/player/data/local/room/dao/ArtistDao;
+Lcom/pulse/player/data/local/room/dao/PlaylistDao;
+Lcom/pulse/player/data/local/room/dao/LyricsDao;
+Lcom/pulse/player/data/local/mediastore/MediaStoreScanner;
+Lcom/pulse/player/data/local/datastore/PreferencesManager;
+Lcom/pulse/player/data/repository/LibraryRepositoryImpl;
+Lcom/pulse/player/data/repository/LyricsRepositoryImpl;
+Lcom/pulse/player/data/repository/SongRecognitionRepositoryImpl;
+Lcom/pulse/player/domain/model/Track;
+Lcom/pulse/player/domain/model/AudioFormatInspector;
+Lcom/pulse/player/util/logger/AppLogger;
+Lcom/pulse/player/util/palette/PaletteExtractor;

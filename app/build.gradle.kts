@@ -116,6 +116,9 @@ dependencies {
     // Audio Tagging & Metadata
     implementation(libs.jaudiotagger)
 
+    // Baseline Profile & Startup Optimization
+    implementation(libs.androidx.profileinstaller)
+
     // Unit & Instrumentation Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

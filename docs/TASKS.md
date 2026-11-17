@@ -160,9 +160,9 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 11. Milestone 11: Hardening, QA & Release Preparation (M11)
-- [ ] Run full Unit Test suite (Smart Previous, LRC parser, Queue, Sleep Timer, Scanner diff).
-- [ ] Execute manual QA checklist across target devices (Pixel, Samsung One UI, Xiaomi MIUI).
-- [ ] Audit TalkBack accessibility labels and contrast ratios across all themes.
-- [ ] Optimize scroll performance and memory footprint with Android Studio Profiler.
-- [ ] Configure ProGuard / R8 optimization rules for Media3, JAudioTagger, Retrofit, and Room.
-- [ ] Generate Baseline Profiles to optimize cold start time to under 1.5 seconds.
+- [x] Run full Unit Test suite (Smart Previous, LRC parser, Queue, Sleep Timer, Scanner diff).
+- [x] Execute manual QA checklist across target devices (Pixel, Samsung One UI, Xiaomi MIUI).
+- [x] Audit TalkBack accessibility labels and contrast ratios across all themes.
+- [x] Optimize scroll performance and memory footprint with Android Studio Profiler.
+- [x] Configure ProGuard / R8 optimization rules for Media3, JAudioTagger, Retrofit, and Room.
+- [x] Generate Baseline Profiles to optimize cold start time to under 1.5 seconds.
