@@ -23,7 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
+import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.components.MiniPlayer
 import com.pulse.player.ui.navigation.PulseBottomBar
 import com.pulse.player.ui.navigation.PulseNavGraph
@@ -39,13 +41,23 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var playbackConnection: PlaybackConnection
 
+    @Inject
+    lateinit var audioEffectsController: AudioEffectsController
+
+    @Inject
+    lateinit var sleepTimerManager: SleepTimerManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
             PulseTheme {
-                PulseAppContent(playbackConnection = playbackConnection)
+                PulseAppContent(
+                    playbackConnection = playbackConnection,
+                    audioEffectsController = audioEffectsController,
+                    sleepTimerManager = sleepTimerManager
+                )
             }
         }
     }
@@ -53,7 +65,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PulseAppContent(
-    playbackConnection: PlaybackConnection
+    playbackConnection: PlaybackConnection,
+    audioEffectsController: AudioEffectsController,
+    sleepTimerManager: SleepTimerManager
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -124,7 +138,9 @@ fun PulseAppContent(
         ) {
             NowPlayingScreen(
                 playbackConnection = playbackConnection,
-                onCollapse = { isNowPlayingExpanded = false }
+                onCollapse = { isNowPlayingExpanded = false },
+                audioEffectsController = audioEffectsController,
+                sleepTimerManager = sleepTimerManager
             )
         }
     }

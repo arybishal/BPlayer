@@ -110,14 +110,14 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 7. Milestone 7: Equalizer, Audio Effects & Sleep Timer (M7)
-- [ ] Implement system-backed Equalizer attached to ExoPlayer audio session ID:
-  - [ ] 5–10 band sliders with decibel scale.
-  - [ ] Presets dropdown (Rock, Pop, Jazz, Flat, etc.) and custom preset saver.
-- [ ] Implement Bass Boost, Virtualizer, and Loudness Enhancer with graceful unsupported checks.
-- [ ] Build Sleep Timer:
-  - [ ] Presets: 15, 30, 45, 60 minutes, Custom Minute Picker, and "End of current track".
-  - [ ] Countdown chip on Now Playing screen.
-  - [ ] 10-second smooth volume fade-out prior to pause.
+- [x] Implement system-backed Equalizer attached to ExoPlayer audio session ID:
+  - [x] 5–10 band sliders with decibel scale.
+  - [x] Presets dropdown (Rock, Pop, Jazz, Flat, etc.) and custom preset saver.
+- [x] Implement Bass Boost, Virtualizer, and Loudness Enhancer with graceful unsupported checks.
+- [x] Build Sleep Timer:
+  - [x] Presets: 15, 30, 45, 60 minutes, Custom Minute Picker, and "End of current track".
+  - [x] Countdown chip on Now Playing screen.
+  - [x] 10-second smooth volume fade-out prior to pause.
 
 ---
 

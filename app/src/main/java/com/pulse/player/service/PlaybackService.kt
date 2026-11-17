@@ -13,6 +13,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.pulse.player.data.local.db.dao.QueueDao
 import com.pulse.player.data.local.db.dao.TrackDao
+import com.pulse.player.service.audiofx.AudioEffectsController
+import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.MainActivity
 import com.pulse.player.util.logger.AppLogger
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,10 +39,21 @@ class PlaybackService : MediaSessionService() {
     @Inject
     lateinit var queueDao: QueueDao
 
+    @Inject
+    lateinit var audioEffectsController: AudioEffectsController
+
+    @Inject
+    lateinit var sleepTimerManager: SleepTimerManager
+
     override fun onCreate() {
         super.onCreate()
         initializePlayer()
         initializeMediaSession()
+        audioEffectsController.attachToSession(exoPlayer.audioSessionId)
+        sleepTimerManager.initialize(
+            onPause = { exoPlayer.pause() },
+            onVolume = { vol -> exoPlayer.volume = vol }
+        )
         AppLogger.i(tag, "PlaybackService created and ExoPlayer initialized.")
     }
 
@@ -68,6 +81,12 @@ class PlaybackService : MediaSessionService() {
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                 AppLogger.e(tag, "ExoPlayer playback error: ${error.errorCodeName}", error)
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    sleepTimerManager.onTrackEnded()
+                }
             }
         })
     }
@@ -117,6 +136,8 @@ class PlaybackService : MediaSessionService() {
     override fun onDestroy() {
         AppLogger.i(tag, "Destroying PlaybackService")
         serviceScope.cancel()
+        audioEffectsController.releaseEffects()
+        sleepTimerManager.cancelTimer()
         mediaSession?.run {
             player.release()
             release()

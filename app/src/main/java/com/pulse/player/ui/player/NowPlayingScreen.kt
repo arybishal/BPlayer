@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,8 +26,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.MusicNote
@@ -64,9 +67,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
 import com.pulse.player.service.model.RepeatState
+import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.components.HeroSeekBar
+import com.pulse.player.ui.equalizer.EqualizerSheet
+import com.pulse.player.ui.sleeptimer.SleepTimerDialog
 import com.pulse.player.ui.theme.HeroAlbumArtShape
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
@@ -78,6 +85,8 @@ import kotlinx.coroutines.launch
 fun NowPlayingScreen(
     playbackConnection: PlaybackConnection,
     onCollapse: () -> Unit,
+    audioEffectsController: AudioEffectsController? = null,
+    sleepTimerManager: SleepTimerManager? = null,
     modifier: Modifier = Modifier
 ) {
     val state by playbackConnection.playbackState.collectAsState()
@@ -93,6 +102,9 @@ fun NowPlayingScreen(
 
     val activeAccent = dynamicAccent ?: MaterialTheme.colorScheme.primary
     val pagerState = rememberPagerState(pageCount = { 3 })
+    var showEqualizer by remember { mutableStateOf(false) }
+    var showSleepTimer by remember { mutableStateOf(false) }
+    val sleepTimerState by sleepTimerManager?.state?.collectAsState() ?: remember { mutableStateOf(null) }
 
     var heartScaleTarget by remember { mutableFloatStateOf(1.0f) }
     val heartScale by animateFloatAsState(
@@ -134,12 +146,31 @@ fun NowPlayingScreen(
                 )
             }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "PLAYING FROM",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = extendedColors.onSurfaceSubtle
-                )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                if (sleepTimerState?.isActive == true) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(activeAccent.copy(alpha = 0.18f))
+                            .clickable { showSleepTimer = true }
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "🌙 ${sleepTimerState?.formattedRemaining}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = activeAccent
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "PLAYING FROM",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = extendedColors.onSurfaceSubtle
+                    )
+                }
                 Text(
                     text = track.album,
                     style = MaterialTheme.typography.labelMedium,
@@ -149,15 +180,34 @@ fun NowPlayingScreen(
                 )
             }
 
-            IconButton(
-                onClick = {},
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.MoreVert,
-                    contentDescription = "Options",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (audioEffectsController != null) {
+                    IconButton(
+                        onClick = { showEqualizer = true },
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.GraphicEq,
+                            contentDescription = "Equalizer",
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                if (sleepTimerManager != null) {
+                    IconButton(
+                        onClick = { showSleepTimer = true },
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Bedtime,
+                            contentDescription = "Sleep Timer",
+                            tint = if (sleepTimerState?.isActive == true) activeAccent else MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
             }
         }
 
@@ -315,13 +365,13 @@ fun NowPlayingScreen(
             }
 
             IconButton(
-                onClick = {},
+                onClick = { showSleepTimer = true },
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Timer,
                     contentDescription = "Sleep Timer",
-                    tint = extendedColors.onSurfaceMuted,
+                    tint = if (sleepTimerState?.isActive == true) activeAccent else extendedColors.onSurfaceMuted,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -359,6 +409,20 @@ fun NowPlayingScreen(
                 )
             }
         }
+    }
+
+    if (showEqualizer && audioEffectsController != null) {
+        EqualizerSheet(
+            audioEffectsController = audioEffectsController,
+            onDismiss = { showEqualizer = false }
+        )
+    }
+
+    if (showSleepTimer && sleepTimerManager != null) {
+        SleepTimerDialog(
+            sleepTimerManager = sleepTimerManager,
+            onDismiss = { showSleepTimer = false }
+        )
     }
 }
 
