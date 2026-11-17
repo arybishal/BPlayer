@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -39,12 +38,13 @@ import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.VerifiedUser
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -53,6 +53,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,7 +69,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,9 +81,6 @@ import com.pulse.player.ui.theme.AccentAmber
 import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.AccentCoral
 import com.pulse.player.ui.theme.AccentEmerald
-import com.pulse.player.ui.theme.AmoledBackground
-import com.pulse.player.ui.theme.DarkBackground
-import com.pulse.player.ui.theme.LightBackground
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.ThemeMode
 
@@ -99,12 +96,12 @@ fun SettingsScreen(
     val extendedColors = LocalExtendedColors.current
     val context = LocalContext.current
 
-    var showThemeDialog by remember { mutableStateOf(false) }
-    var showAccentDialog by remember { mutableStateOf(false) }
-    var showFontDialog by remember { mutableStateOf(false) }
-    var showBatteryDialog by remember { mutableStateOf(false) }
-    var showApiKeysDialog by remember { mutableStateOf(false) }
-    var showAboutDialog by remember { mutableStateOf(false) }
+    var showThemeSheet by remember { mutableStateOf(false) }
+    var showAccentSheet by remember { mutableStateOf(false) }
+    var showFontSheet by remember { mutableStateOf(false) }
+    var showBatterySheet by remember { mutableStateOf(false) }
+    var showApiKeysSheet by remember { mutableStateOf(false) }
+    var showAboutSheet by remember { mutableStateOf(false) }
     var showEqualizerSheet by remember { mutableStateOf(false) }
     var showSleepTimerDialog by remember { mutableStateOf(false) }
 
@@ -143,46 +140,22 @@ fun SettingsScreen(
                 icon = Icons.Rounded.ColorLens,
                 title = "Theme Foundation",
                 subtitle = themeLabel,
-                onClick = { showThemeDialog = true },
-                trailingContent = {
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(
-                                when (state.themeMode) {
-                                    ThemeMode.AMOLED -> AmoledBackground
-                                    ThemeMode.LIGHT -> LightBackground
-                                    else -> DarkBackground
-                                }
-                            )
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                    )
-                }
+                onClick = { showThemeSheet = true }
             )
 
             SettingsCardDivider()
 
-            val (accentName, accentColor) = when (state.accentChoice) {
-                AccentChoice.WARM_AMBER -> Pair("Warm Amber", AccentAmber)
-                AccentChoice.SUNSET_CORAL -> Pair("Sunset Coral", AccentCoral)
-                AccentChoice.DEEP_EMERALD -> Pair("Deep Emerald", AccentEmerald)
+            val accentName = when (state.accentChoice) {
+                AccentChoice.WARM_AMBER -> "Warm Amber"
+                AccentChoice.SUNSET_CORAL -> "Sunset Coral"
+                AccentChoice.DEEP_EMERALD -> "Deep Emerald"
             }
 
             SettingsActionRow(
                 icon = Icons.Rounded.Palette,
                 title = "Accent Color",
                 subtitle = accentName,
-                onClick = { showAccentDialog = true },
-                trailingContent = {
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(accentColor)
-                            .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
-                    )
-                }
+                onClick = { showAccentSheet = true }
             )
 
             SettingsCardDivider()
@@ -191,7 +164,7 @@ fun SettingsScreen(
                 icon = Icons.Rounded.FormatSize,
                 title = "Typography Scale",
                 subtitle = "${(state.fontScale * 100).toInt()}% multiplier",
-                onClick = { showFontDialog = true }
+                onClick = { showFontSheet = true }
             )
 
             SettingsCardDivider()
@@ -239,7 +212,7 @@ fun SettingsScreen(
                 icon = if (isOpt) Icons.Rounded.BatteryAlert else Icons.Rounded.VerifiedUser,
                 title = "Battery Optimization",
                 subtitle = if (isOpt) "Restricted (OEM may kill playback)" else "Unrestricted (Rock-solid background audio)",
-                onClick = { showBatteryDialog = true },
+                onClick = { showBatterySheet = true },
                 trailingContent = {
                     Box(
                         modifier = Modifier
@@ -270,7 +243,7 @@ fun SettingsScreen(
                 icon = Icons.Rounded.Key,
                 title = "API Credentials",
                 subtitle = "Gemini AI (Lyrics) & AudD (Song Identification)",
-                onClick = { showApiKeysDialog = true }
+                onClick = { showApiKeysSheet = true }
             )
         }
 
@@ -293,54 +266,54 @@ fun SettingsScreen(
                 icon = Icons.Rounded.Info,
                 title = "About Pulse",
                 subtitle = "Version 1.0.0 • Offline content-first audio player",
-                onClick = { showAboutDialog = true }
+                onClick = { showAboutSheet = true }
             )
         }
 
         Spacer(modifier = Modifier.height(36.dp))
     }
 
-    // THEME CHOOSER DIALOG
-    if (showThemeDialog) {
-        ThemeChooserDialog(
+    // THEME CHOOSER SHEET
+    if (showThemeSheet) {
+        ThemeChooserSheet(
             currentMode = state.themeMode,
-            onDismiss = { showThemeDialog = false },
+            onDismiss = { showThemeSheet = false },
             onSelectMode = {
                 viewModel.setThemeMode(it)
-                showThemeDialog = false
+                showThemeSheet = false
             }
         )
     }
 
-    // ACCENT COLOR DIALOG
-    if (showAccentDialog) {
-        AccentChooserDialog(
+    // ACCENT COLOR SHEET
+    if (showAccentSheet) {
+        AccentChooserSheet(
             currentChoice = state.accentChoice,
-            onDismiss = { showAccentDialog = false },
+            onDismiss = { showAccentSheet = false },
             onSelectChoice = {
                 viewModel.setAccentChoice(it)
-                showAccentDialog = false
+                showAccentSheet = false
             }
         )
     }
 
-    // FONT SCALE DIALOG
-    if (showFontDialog) {
-        FontScaleDialog(
+    // FONT SCALE SHEET
+    if (showFontSheet) {
+        FontScaleSheet(
             currentScale = state.fontScale,
-            onDismiss = { showFontDialog = false },
+            onDismiss = { showFontSheet = false },
             onSave = {
                 viewModel.setFontScale(it)
-                showFontDialog = false
+                showFontSheet = false
             }
         )
     }
 
-    // BATTERY OPTIMIZATION DIALOG
-    if (showBatteryDialog) {
-        BatteryOptimizationDialog(
+    // BATTERY OPTIMIZATION SHEET
+    if (showBatterySheet) {
+        BatteryOptimizationSheet(
             isOptimized = state.isBatteryOptimized,
-            onDismiss = { showBatteryDialog = false },
+            onDismiss = { showBatterySheet = false },
             onRequestExemption = {
                 try {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
@@ -351,29 +324,29 @@ fun SettingsScreen(
                     val fallbackIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                     context.startActivity(fallbackIntent)
                 }
-                showBatteryDialog = false
+                showBatterySheet = false
             }
         )
     }
 
-    // API KEYS DIALOG
-    if (showApiKeysDialog) {
-        ApiKeysDialog(
+    // API KEYS SHEET
+    if (showApiKeysSheet) {
+        ApiKeysSheet(
             initialGeminiKey = state.geminiApiKey,
             initialAuddKey = state.auddApiKey,
-            onDismiss = { showApiKeysDialog = false },
+            onDismiss = { showApiKeysSheet = false },
             onSave = { gemini, audd ->
                 viewModel.setGeminiApiKey(gemini)
                 viewModel.setAuddApiKey(audd)
-                showApiKeysDialog = false
+                showApiKeysSheet = false
             }
         )
     }
 
-    // ABOUT DIALOG
-    if (showAboutDialog) {
-        AboutPulseDialog(
-            onDismiss = { showAboutDialog = false }
+    // ABOUT SHEET
+    if (showAboutSheet) {
+        AboutPulseSheet(
+            onDismiss = { showAboutSheet = false }
         )
     }
 
@@ -457,7 +430,6 @@ private fun SettingsActionRow(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon Squircle Container
         Box(
             modifier = Modifier
                 .size(38.dp)
@@ -573,68 +545,81 @@ private fun SettingsSwitchRow(
 }
 
 // -------------------------------------------------------------------------------------------------
-// POLISHED SUB-DIALOGS ("CSS" & LAYOUT)
+// MODERN BOTTOM SHEETS (ZERO OVAL/CIRCULAR BUBBLES)
 // -------------------------------------------------------------------------------------------------
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeChooserDialog(
+private fun ThemeChooserSheet(
     currentMode: ThemeMode,
     onDismiss: () -> Unit,
     onSelectMode: (ThemeMode) -> Unit
 ) {
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val extendedColors = LocalExtendedColors.current
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Text(
-                text = "Choose Theme Foundation",
+                text = "Theme Foundation",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Select your preferred contrast and background tone",
+                style = MaterialTheme.typography.bodyMedium,
+                color = extendedColors.onSurfaceMuted
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ThemeOptionItem(
                     title = "Charcoal Dark (Default)",
-                    subtitle = "Refined deep neutral charcoals",
-                    dotColor = DarkBackground,
+                    subtitle = "Refined deep neutral charcoals (#121214)",
                     isSelected = currentMode == ThemeMode.DARK,
                     onClick = { onSelectMode(ThemeMode.DARK) }
                 )
                 ThemeOptionItem(
                     title = "Pitch Black (AMOLED)",
                     subtitle = "Pure #000000 backdrop for display battery savings",
-                    dotColor = AmoledBackground,
                     isSelected = currentMode == ThemeMode.AMOLED,
                     onClick = { onSelectMode(ThemeMode.AMOLED) }
                 )
                 ThemeOptionItem(
                     title = "Warm Light",
                     subtitle = "Soft daylight cream tones (strictly no blue gradients)",
-                    dotColor = LightBackground,
                     isSelected = currentMode == ThemeMode.LIGHT,
                     onClick = { onSelectMode(ThemeMode.LIGHT) }
                 )
                 ThemeOptionItem(
                     title = "Follow System",
                     subtitle = "Automatically adapts to your Android OS Dark Mode",
-                    dotColor = MaterialTheme.colorScheme.primary,
                     isSelected = currentMode == ThemeMode.SYSTEM,
                     onClick = { onSelectMode(ThemeMode.SYSTEM) }
                 )
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
 
 @Composable
 private fun ThemeOptionItem(
     title: String,
     subtitle: String,
-    dotColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -643,30 +628,20 @@ private fun ThemeOptionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                else MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
             )
             .border(
-                width = if (isSelected) 1.dp else 0.5.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
+                width = if (isSelected) 1.5.dp else 0.75.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(14.dp)
             )
             .clickable(onClick = onClick)
-            .padding(14.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(dotColor)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-        )
-
-        Spacer(modifier = Modifier.width(14.dp))
-
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -683,33 +658,59 @@ private fun ThemeOptionItem(
         }
 
         if (isSelected) {
-            Icon(
-                imageVector = Icons.Rounded.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "ACTIVE",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccentChooserDialog(
+private fun AccentChooserSheet(
     currentChoice: AccentChoice,
     onDismiss: () -> Unit,
     onSelectChoice: (AccentChoice) -> Unit
 ) {
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val extendedColors = LocalExtendedColors.current
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Text(
-                text = "Choose Accent Color",
+                text = "Accent Color",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Curated organic tones — strictly no generic blue gradients",
+                style = MaterialTheme.typography.bodyMedium,
+                color = extendedColors.onSurfaceMuted
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AccentOptionItem(
                     name = "Warm Amber",
                     description = "Warm, organic, and retro-analog (#F4A261)",
@@ -732,12 +733,10 @@ private fun AccentChooserDialog(
                     onClick = { onSelectChoice(AccentChoice.DEEP_EMERALD) }
                 )
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
 
 @Composable
@@ -753,26 +752,27 @@ private fun AccentOptionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(
                 if (isSelected) color.copy(alpha = 0.12f)
-                else MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
             )
             .border(
-                width = if (isSelected) 1.25.dp else 0.5.dp,
-                color = if (isSelected) color else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(12.dp)
+                width = if (isSelected) 1.5.dp else 0.75.dp,
+                color = if (isSelected) color else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(14.dp)
             )
             .clickable(onClick = onClick)
-            .padding(14.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Vertical Color Accent Bar
         Box(
             modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
+                .width(6.dp)
+                .height(36.dp)
+                .clip(RoundedCornerShape(3.dp))
                 .background(color)
-                .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
         )
 
         Spacer(modifier = Modifier.width(14.dp))
@@ -793,255 +793,321 @@ private fun AccentOptionItem(
         }
 
         if (isSelected) {
-            Icon(
-                imageVector = Icons.Rounded.Check,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(color)
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = "ACTIVE",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 10.sp),
+                    color = Color.Black
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FontScaleDialog(
+private fun FontScaleSheet(
     currentScale: Float,
     onDismiss: () -> Unit,
     onSave: (Float) -> Unit
 ) {
     var scale by remember { mutableFloatStateOf(currentScale) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val extendedColors = LocalExtendedColors.current
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Text(
                 text = "Typography Scaling",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column {
-                Text(
-                    text = "Adjust text size proportionally across all library and player screens.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = extendedColors.onSurfaceMuted
-                )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Adjust text size proportionally across all library and player screens",
+                style = MaterialTheme.typography.bodyMedium,
+                color = extendedColors.onSurfaceMuted
+            )
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-                // Live dynamic preview card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(0.75.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                        .padding(14.dp)
-                ) {
-                    Column {
-                        Text(
-                            text = "Bohemian Rhapsody",
-                            fontSize = (18f * scale).sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Queen • A Night at the Opera",
-                            fontSize = (13f * scale).sp,
-                            color = extendedColors.onSurfaceMuted
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            // Dynamic Live Preview Box
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .border(0.75.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
                     Text(
-                        text = "Scale Factor",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = "Bohemian Rhapsody",
+                        fontSize = (18f * scale).sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Queen • A Night at the Opera",
+                        fontSize = (13f * scale).sp,
                         color = extendedColors.onSurfaceMuted
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Text Multiplier",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = extendedColors.onSurfaceMuted
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .padding(horizontal = 10.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = "${(scale * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Slider(
+                value = scale,
+                onValueChange = { scale = it },
+                valueRange = 0.85f..1.40f,
+                steps = 10,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Preset pills
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    Pair("85%", 0.85f),
+                    Pair("100%", 1.0f),
+                    Pair("115%", 1.15f),
+                    Pair("130%", 1.30f)
+                ).forEach { (label, value) ->
+                    val isPreset = (scale - value) in -0.02f..0.02f
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                            .weight(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (isPreset) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
+                            .border(
+                                0.75.dp,
+                                if (isPreset) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { scale = value }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "${(scale * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = if (isPreset) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
-
-                Slider(
-                    value = scale,
-                    onValueChange = { scale = it },
-                    valueRange = 0.85f..1.40f,
-                    steps = 10,
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Quick preset buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    listOf(
-                        Pair("85%", 0.85f),
-                        Pair("100%", 1.0f),
-                        Pair("115%", 1.15f),
-                        Pair("130%", 1.30f)
-                    ).forEach { (label, value) ->
-                        val isPreset = (scale - value) in -0.02f..0.02f
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    if (isPreset) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                                )
-                                .clickable { scale = value }
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = if (isPreset) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
             }
-        },
-        confirmButton = {
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = { onSave(scale) },
-                shape = RoundedCornerShape(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Apply")
+                Text(
+                    text = "Apply Typography Scale",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BatteryOptimizationDialog(
+private fun BatteryOptimizationSheet(
     isOptimized: Boolean,
     onDismiss: () -> Unit,
     onRequestExemption: () -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val extendedColors = LocalExtendedColors.current
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Text(
                 text = "Background Reliability",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Hero Status Card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            if (isOptimized) extendedColors.statusDanger.copy(alpha = 0.12f)
-                            else extendedColors.statusSuccess.copy(alpha = 0.12f)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Prevent OEM aggressive process managers from killing background music",
+                style = MaterialTheme.typography.bodyMedium,
+                color = extendedColors.onSurfaceMuted
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Status Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (isOptimized) extendedColors.statusDanger.copy(alpha = 0.12f)
+                        else extendedColors.statusSuccess.copy(alpha = 0.12f)
+                    )
+                    .border(
+                        0.75.dp,
+                        if (isOptimized) extendedColors.statusDanger.copy(alpha = 0.4f)
+                        else extendedColors.statusSuccess.copy(alpha = 0.4f),
+                        RoundedCornerShape(14.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (isOptimized) Icons.Rounded.BatteryAlert else Icons.Rounded.VerifiedUser,
+                        contentDescription = null,
+                        tint = if (isOptimized) extendedColors.statusDanger else extendedColors.statusSuccess,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column {
+                        Text(
+                            text = if (isOptimized) "Battery Restrictions Active" else "Unrestricted Background Audio",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isOptimized) extendedColors.statusDanger else extendedColors.statusSuccess
                         )
-                        .border(
-                            0.75.dp,
-                            if (isOptimized) extendedColors.statusDanger.copy(alpha = 0.4f)
-                            else extendedColors.statusSuccess.copy(alpha = 0.4f),
-                            RoundedCornerShape(12.dp)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (isOptimized) "OEM process killer may terminate playback after 15–30 min"
+                            else "Audio survives screen locks, deep sleep, and system doze",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        .padding(14.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = if (isOptimized) Icons.Rounded.BatteryAlert else Icons.Rounded.VerifiedUser,
-                            contentDescription = null,
-                            tint = if (isOptimized) extendedColors.statusDanger else extendedColors.statusSuccess,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = if (isOptimized) "Battery Restricted" else "Unrestricted Background Audio",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isOptimized) extendedColors.statusDanger else extendedColors.statusSuccess
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = if (isOptimized) "OEM process killer may stop audio after 15–30 min"
-                                else "Audio will survive deep sleep & screen locks",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                     }
                 }
-
-                Text(
-                    text = "OEM Whitelist Instructions:",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                        .padding(12.dp)
-                ) {
-                    Text("• Xiaomi / HyperOS: Set Battery Saver to 'No restrictions' & enable 'Autostart'", style = MaterialTheme.typography.bodySmall)
-                    Text("• Samsung One UI: Battery > Remove Pulse from 'Sleeping apps'", style = MaterialTheme.typography.bodySmall)
-                    Text("• OnePlus / Oppo: App Management > Pulse > Disable 'Pause activity if unused'", style = MaterialTheme.typography.bodySmall)
-                    Text("• Huawei / EMUI: App Launch > Set Pulse to 'Manage manually'", style = MaterialTheme.typography.bodySmall)
-                }
             }
-        },
-        confirmButton = {
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Text(
+                text = "OEM Guidelines:",
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .border(0.75.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                    .padding(14.dp)
+            ) {
+                Text("• Xiaomi / HyperOS: Set Battery Saver to 'No restrictions' & enable 'Autostart'", style = MaterialTheme.typography.bodySmall)
+                Text("• Samsung One UI: Settings > Battery > Remove Pulse from 'Sleeping apps'", style = MaterialTheme.typography.bodySmall)
+                Text("• OnePlus / Oppo: App Info > Pulse > Disable 'Pause activity if unused'", style = MaterialTheme.typography.bodySmall)
+                Text("• Huawei / EMUI: Settings > Battery > App Launch > Set Pulse to 'Manage manually'", style = MaterialTheme.typography.bodySmall)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             if (isOptimized) {
                 Button(
                     onClick = onRequestExemption,
-                    shape = RoundedCornerShape(10.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Allow Unrestricted")
+                    Text(
+                        text = "Allow Unrestricted Background Use",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                    )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
+
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(text = "Close")
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ApiKeysDialog(
+private fun ApiKeysSheet(
     initialGeminiKey: String,
     initialAuddKey: String,
     onDismiss: () -> Unit,
@@ -1049,82 +1115,101 @@ private fun ApiKeysDialog(
 ) {
     var geminiKey by remember { mutableStateOf(initialGeminiKey) }
     var auddKey by remember { mutableStateOf(initialAuddKey) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val extendedColors = LocalExtendedColors.current
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Text(
                 text = "Cloud & AI Credentials",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = "🔒 Keys are stored securely in local app preferences on your device and are never uploaded to any intermediary servers.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Keys are securely persisted in local device DataStore and never shared",
+                style = MaterialTheme.typography.bodyMedium,
+                color = extendedColors.onSurfaceMuted
+            )
 
-                OutlinedTextField(
-                    value = geminiKey,
-                    onValueChange = { geminiKey = it },
-                    label = { Text("Gemini AI API Key (Lyrics Generation)") },
-                    placeholder = { Text("AIzaSy...") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Spacer(modifier = Modifier.height(18.dp))
 
-                OutlinedTextField(
-                    value = auddKey,
-                    onValueChange = { auddKey = it },
-                    label = { Text("AudD API Token (Song Identification)") },
-                    placeholder = { Text("Your token from audd.io") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
+            OutlinedTextField(
+                value = geminiKey,
+                onValueChange = { geminiKey = it },
+                label = { Text("Gemini AI API Key (Lyrics Generation)") },
+                placeholder = { Text("AIzaSy...") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = auddKey,
+                onValueChange = { auddKey = it },
+                label = { Text("AudD API Token (Song Identification)") },
+                placeholder = { Text("Your token from audd.io") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = { onSave(geminiKey, auddKey) },
-                shape = RoundedCornerShape(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Save")
+                Text(
+                    text = "Save Credentials",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                )
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AboutPulseDialog(
+private fun AboutPulseSheet(
     onDismiss: () -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val extendedColors = LocalExtendedColors.current
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1132,57 +1217,65 @@ private fun AboutPulseDialog(
                         imageVector = Icons.Rounded.MusicNote,
                         contentDescription = null,
                         tint = Color.Black,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
                         text = "Pulse Music Player",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Version 1.0.0 (Release Build)",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         color = extendedColors.onSurfaceMuted
                     )
                 }
             }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    text = "Pulse is an exquisite, offline, content-first audio player engineered with Jetpack Compose and AndroidX Media3.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
 
-                // Feature Highlights Pills
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(12.dp)
-                ) {
-                    Text("• Strict Warm Palette (NO generic blue gradients)", style = MaterialTheme.typography.bodySmall)
-                    Text("• Hi-Res & DSD Decimation Pipeline (up to 24-bit/88.2kHz)", style = MaterialTheme.typography.bodySmall)
-                    Text("• Synchronized Precision LRC Lyrics + In-App Editor", style = MaterialTheme.typography.bodySmall)
-                    Text("• Hardware EQ, Bass Boost, 3D Virtualizer & Sleep Fadeout", style = MaterialTheme.typography.bodySmall)
-                    Text("• Acoustic Song Recognition Powered by AudD", style = MaterialTheme.typography.bodySmall)
-                    Text("• Scoped Storage In-Place Metadata & Tag Editing", style = MaterialTheme.typography.bodySmall)
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Pulse is an exquisite, offline, content-first audio player engineered with Jetpack Compose and AndroidX Media3.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .border(0.75.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                    .padding(14.dp)
+            ) {
+                Text("• Strict Warm Palette (NO generic blue gradients)", style = MaterialTheme.typography.bodySmall)
+                Text("• Hi-Res & DSD Decimation Pipeline (up to 24-bit/88.2kHz)", style = MaterialTheme.typography.bodySmall)
+                Text("• Synchronized Precision LRC Lyrics + In-App Editor", style = MaterialTheme.typography.bodySmall)
+                Text("• Hardware EQ, Bass Boost, 3D Virtualizer & Sleep Fadeout", style = MaterialTheme.typography.bodySmall)
+                Text("• Acoustic Song Recognition Powered by AudD", style = MaterialTheme.typography.bodySmall)
+                Text("• Scoped Storage In-Place Metadata & Tag Editing", style = MaterialTheme.typography.bodySmall)
             }
-        },
-        confirmButton = {
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = onDismiss,
-                shape = RoundedCornerShape(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Close")
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
-    )
+    }
 }
