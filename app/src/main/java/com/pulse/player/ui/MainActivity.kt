@@ -32,6 +32,7 @@ import com.pulse.player.ui.navigation.PulseBottomBar
 import com.pulse.player.ui.navigation.PulseNavGraph
 import com.pulse.player.ui.navigation.Screen
 import com.pulse.player.ui.player.NowPlayingScreen
+import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.PulseTheme
 import com.pulse.player.ui.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,11 +59,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeMode by preferencesManager.themeModeFlow.collectAsState(initial = ThemeMode.DARK)
+            val accentChoice by preferencesManager.accentChoiceFlow.collectAsState(initial = AccentChoice.WARM_AMBER)
             val fontScale by preferencesManager.fontScaleFlow.collectAsState(initial = 1.0f)
             val isGlassEnabled by preferencesManager.liquidGlassFlow.collectAsState(initial = true)
 
             PulseTheme(
                 themeMode = themeMode,
+                accentChoice = accentChoice,
                 fontScale = fontScale,
                 isGlassEnabled = isGlassEnabled
             ) {

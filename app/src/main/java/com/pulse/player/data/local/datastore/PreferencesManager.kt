@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ class PreferencesManager @Inject constructor(
 ) : RecognitionPreferences {
     companion object {
         val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
+        val KEY_ACCENT_CHOICE = stringPreferencesKey("accent_choice")
         val KEY_FONT_SCALE = floatPreferencesKey("font_scale")
         val KEY_LIQUID_GLASS = booleanPreferencesKey("liquid_glass_enabled")
         val KEY_GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
@@ -32,6 +34,11 @@ class PreferencesManager @Inject constructor(
     val themeModeFlow: Flow<ThemeMode> = context.pulseDataStore.data.map { prefs ->
         val modeStr = prefs[KEY_THEME_MODE] ?: ThemeMode.DARK.name
         try { ThemeMode.valueOf(modeStr) } catch (_: Exception) { ThemeMode.DARK }
+    }
+
+    val accentChoiceFlow: Flow<AccentChoice> = context.pulseDataStore.data.map { prefs ->
+        val accentStr = prefs[KEY_ACCENT_CHOICE] ?: AccentChoice.WARM_AMBER.name
+        try { AccentChoice.valueOf(accentStr) } catch (_: Exception) { AccentChoice.WARM_AMBER }
     }
 
     val fontScaleFlow: Flow<Float> = context.pulseDataStore.data.map { prefs ->
@@ -52,6 +59,10 @@ class PreferencesManager @Inject constructor(
 
     suspend fun setThemeMode(mode: ThemeMode) {
         context.pulseDataStore.edit { it[KEY_THEME_MODE] = mode.name }
+    }
+
+    suspend fun setAccentChoice(accent: AccentChoice) {
+        context.pulseDataStore.edit { it[KEY_ACCENT_CHOICE] = accent.name }
     }
 
     suspend fun setFontScale(scale: Float) {

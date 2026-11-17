@@ -5,6 +5,7 @@ import android.os.PowerManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pulse.player.data.local.datastore.PreferencesManager
+import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,11 +19,19 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.DARK,
+    val accentChoice: AccentChoice = AccentChoice.WARM_AMBER,
     val fontScale: Float = 1.0f,
     val isLiquidGlassEnabled: Boolean = true,
     val isBatteryOptimized: Boolean = true,
     val geminiApiKey: String = "",
     val auddApiKey: String = ""
+)
+
+private data class ThemeAndStyleData(
+    val theme: ThemeMode,
+    val accent: AccentChoice,
+    val fontScale: Float,
+    val glass: Boolean
 )
 
 @HiltViewModel
@@ -35,10 +44,11 @@ class SettingsViewModel @Inject constructor(
 
     private val themeAndFontFlow = combine(
         preferencesManager.themeModeFlow,
+        preferencesManager.accentChoiceFlow,
         preferencesManager.fontScaleFlow,
         preferencesManager.liquidGlassFlow
-    ) { theme, fontScale, glass ->
-        Triple(theme, fontScale, glass)
+    ) { theme, accent, fontScale, glass ->
+        ThemeAndStyleData(theme, accent, fontScale, glass)
     }
 
     private val apiAndBatteryFlow = combine(
@@ -52,11 +62,12 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = combine(
         themeAndFontFlow,
         apiAndBatteryFlow
-    ) { (theme, fontScale, glass), (geminiKey, auddKey, batteryOpt) ->
+    ) { styleData, (geminiKey, auddKey, batteryOpt) ->
         SettingsUiState(
-            themeMode = theme,
-            fontScale = fontScale,
-            isLiquidGlassEnabled = glass,
+            themeMode = styleData.theme,
+            accentChoice = styleData.accent,
+            fontScale = styleData.fontScale,
+            isLiquidGlassEnabled = styleData.glass,
             isBatteryOptimized = batteryOpt,
             geminiApiKey = geminiKey,
             auddApiKey = auddKey
@@ -78,6 +89,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { preferencesManager.setThemeMode(mode) }
+    }
+
+    fun setAccentChoice(choice: AccentChoice) {
+        viewModelScope.launch { preferencesManager.setAccentChoice(choice) }
     }
 
     fun setFontScale(scale: Float) {
