@@ -54,9 +54,11 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material3.OutlinedTextField
 import com.pulse.player.domain.model.Playlist
 import com.pulse.player.domain.model.Track
+import com.pulse.player.ui.tageditor.TagEditorSheet
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
 import java.io.File
@@ -82,6 +84,7 @@ fun SongActionsSheet(
     var showDetailsDialog by remember { mutableStateOf(false) }
     var showPlaylistDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var showTagEditor by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -228,6 +231,14 @@ fun SongActionsSheet(
             )
 
             ActionListItem(
+                icon = Icons.Rounded.EditNote,
+                label = "Edit song tags & artwork",
+                onClick = {
+                    showTagEditor = true
+                }
+            )
+
+            ActionListItem(
                 icon = Icons.Rounded.DeleteOutline,
                 label = "Delete song",
                 labelColor = extendedColors.statusDanger,
@@ -286,6 +297,20 @@ fun SongActionsSheet(
                 TextButton(onClick = { showDeleteConfirmDialog = false }) {
                     Text(text = "Cancel")
                 }
+            }
+        )
+    }
+
+    if (showTagEditor) {
+        TagEditorSheet(
+            track = track,
+            onDismiss = {
+                showTagEditor = false
+                onDismiss()
+            },
+            onSaveSuccess = {
+                showTagEditor = false
+                onDismiss()
             }
         )
     }

@@ -99,13 +99,13 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 6. Milestone 6: Tag Editor & Album Art Discovery (M6)
-- [ ] Implement scoped storage write flow using `MediaStore.createWriteRequest` (Android 11+).
-- [ ] Integrate JAudioTagger for in-place tag editing (Title, Artist, Album, Year, Genre, Track Number).
-- [ ] Build Tag Editor bottom sheet with field validation.
-- [ ] Implement online album art search pipeline (MusicBrainz + Cover Art Archive, iTunes API, Deezer API).
-- [ ] Build 3-column candidate artwork picker dialog.
-- [ ] Add "Pick artwork from device gallery" option using Android Photo Picker.
-- [ ] Embed artwork into audio file tags or save to app cache and update Room.
+- [x] Implement scoped storage write flow using `MediaStore.createWriteRequest` (Android 11+).
+- [x] Integrate JAudioTagger for in-place tag editing (Title, Artist, Album, Year, Genre, Track Number).
+- [x] Build Tag Editor bottom sheet with field validation.
+- [x] Implement online album art search pipeline (MusicBrainz + Cover Art Archive, iTunes API, Deezer API).
+- [x] Build 3-column candidate artwork picker dialog.
+- [x] Add "Pick artwork from device gallery" option using Android Photo Picker.
+- [x] Embed artwork into audio file tags or save to app cache and update Room.
 
 ---
 

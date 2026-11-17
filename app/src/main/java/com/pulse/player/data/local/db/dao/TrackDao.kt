@@ -67,6 +67,18 @@ interface TrackDao {
     @Query("UPDATE tracks SET playCount = playCount + 1 WHERE id = :id")
     suspend fun incrementPlayCount(id: String)
 
+    @Query("UPDATE tracks SET title = :title, artist = :artist, album = :album, year = :year, genre = :genre, trackNumber = :trackNumber, artworkUri = :artworkUri WHERE id = :id")
+    suspend fun updateTrackTags(
+        id: String,
+        title: String,
+        artist: String,
+        album: String,
+        year: Int,
+        genre: String,
+        trackNumber: Int,
+        artworkUri: String?
+    )
+
     @Query("DELETE FROM tracks WHERE id = :id")
     suspend fun deleteTrackById(id: String)
 
