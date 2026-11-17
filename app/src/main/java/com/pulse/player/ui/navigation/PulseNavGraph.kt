@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.pulse.player.service.controller.PlaybackConnection
 import com.pulse.player.ui.home.HomeScreen
 import com.pulse.player.ui.library.LibraryScreen
 import com.pulse.player.ui.search.SearchScreen
@@ -14,6 +15,7 @@ import com.pulse.player.ui.settings.logs.ErrorLogsScreen
 @Composable
 fun PulseNavGraph(
     navController: NavHostController,
+    playbackConnection: PlaybackConnection,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -32,7 +34,11 @@ fun PulseNavGraph(
         }
 
         composable(Screen.Library.route) {
-            LibraryScreen()
+            LibraryScreen(
+                onTrackClick = { track, queue ->
+                    playbackConnection.playTrack(track, queue)
+                }
+            )
         }
 
         composable(Screen.Search.route) {

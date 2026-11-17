@@ -68,6 +68,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LibraryScreen(
+    onTrackClick: (com.pulse.player.domain.model.Track, List<com.pulse.player.domain.model.Track>) -> Unit = { _, _ -> },
     viewModel: LibraryViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -303,7 +304,7 @@ fun LibraryScreen(
                             items(state.tracks, key = { it.id }) { track ->
                                 TrackItemRow(
                                     track = track,
-                                    onTrackClick = {},
+                                    onTrackClick = { onTrackClick(it, state.tracks) },
                                     onFavoriteClick = { viewModel.toggleFavorite(it) },
                                     onMoreClick = {}
                                 )

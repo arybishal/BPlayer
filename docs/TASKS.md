@@ -36,23 +36,23 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 2: Playback Engine Core & Transport (M2)
-- [ ] Implement `PlaybackService` extending AndroidX Media3 `MediaSessionService`.
-- [ ] Configure `ExoPlayer` instance with audio attributes (usage: `USAGE_MEDIA`, content type: `CONTENT_TYPE_MUSIC`).
-- [ ] Build rich media foreground notification with album art and transport controls.
-- [ ] Implement Audio Focus manager (ducking on alerts, pause on incoming calls).
-- [ ] Implement `BECOMING_NOISY` receiver (auto-pause when headphones unplugged).
-- [ ] Implement `MediaController` connection bridge for UI state observation.
-- [ ] Build persistent Mini Player:
-  - [ ] Track thumbnail, title, artist.
-  - [ ] Play/Pause morph icon button, Next button.
-  - [ ] Swipe gestures (up to expand, left/right for next/prev).
-- [ ] Build Hero Seek Bar with expanding thumb and live elapsed/remaining timestamps.
-- [ ] Implement **Smart Previous Button**:
-  - [ ] Single tap: instant seek to 0:00.
-  - [ ] Double tap (< 350ms): jump to previous track.
-  - [ ] Previous button behavior setting (Smart, Always Previous, Always Restart).
-- [ ] Implement Shuffle (non-repeating index mapping) and Repeat modes (Off, All, One).
-- [ ] Build Queue Manager with Room persistence, drag-to-reorder, and swipe-to-delete.
+- [x] Implement `PlaybackService` extending AndroidX Media3 `MediaSessionService`.
+- [x] Configure `ExoPlayer` instance with audio attributes (usage: `USAGE_MEDIA`, content type: `CONTENT_TYPE_MUSIC`).
+- [x] Build rich media foreground notification with album art and transport controls.
+- [x] Implement Audio Focus manager (ducking on alerts, pause on incoming calls).
+- [x] Implement `BECOMING_NOISY` receiver (auto-pause when headphones unplugged).
+- [x] Implement `MediaController` connection bridge for UI state observation.
+- [x] Build persistent Mini Player:
+  - [x] Track thumbnail, title, artist.
+  - [x] Play/Pause morph icon button, Next button.
+  - [x] Swipe gestures (up to expand, left/right for next/prev).
+- [x] Build Hero Seek Bar with expanding thumb and live elapsed/remaining timestamps.
+- [x] Implement **Smart Previous Button**:
+  - [x] Single tap: instant seek to 0:00.
+  - [x] Double tap (< 350ms): jump to previous track.
+  - [x] Previous button behavior setting (Smart, Always Previous, Always Restart).
+- [x] Implement Shuffle (non-repeating index mapping) and Repeat modes (Off, All, One).
+- [x] Build Queue Manager with Room persistence, drag-to-reorder, and swipe-to-delete.
 
 ---
 
