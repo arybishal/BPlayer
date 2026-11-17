@@ -63,14 +63,26 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlists ORDER BY name COLLATE NOCASE ASC")
     fun getAllPlaylists(): Flow<List<PlaylistEntity>>
 
+    @Query("SELECT * FROM playlists WHERE id = :id LIMIT 1")
+    suspend fun getPlaylistById(id: Long): PlaylistEntity?
+
     @Query("DELETE FROM playlists WHERE id = :id")
     suspend fun deletePlaylist(id: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylistTracks(tracks: List<PlaylistTrackEntity>)
 
+    @Query("DELETE FROM playlist_tracks WHERE playlistId = :playlistId AND trackId = :trackId")
+    suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: String)
+
     @Query("SELECT t.* FROM tracks t INNER JOIN playlist_tracks pt ON t.id = pt.trackId WHERE pt.playlistId = :playlistId ORDER BY pt.orderIndex ASC")
     fun getTracksForPlaylist(playlistId: Long): Flow<List<TrackEntity>>
+
+    @Query("SELECT COUNT(*) FROM playlist_tracks WHERE playlistId = :playlistId")
+    suspend fun getTrackCountForPlaylist(playlistId: Long): Int
+
+    @Query("UPDATE playlists SET trackCount = :count, updatedAt = :updatedAt WHERE id = :playlistId")
+    suspend fun updatePlaylistTrackCount(playlistId: Long, count: Int, updatedAt: Long = System.currentTimeMillis())
 }
 
 @Dao

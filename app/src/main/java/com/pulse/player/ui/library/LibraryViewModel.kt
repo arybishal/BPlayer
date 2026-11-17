@@ -130,6 +130,31 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    fun createPlaylist(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            repository.createPlaylist(name)
+        }
+    }
+
+    fun deletePlaylist(playlistId: Long) {
+        viewModelScope.launch {
+            repository.deletePlaylist(playlistId)
+        }
+    }
+
+    fun addTrackToPlaylist(playlistId: Long, trackId: String) {
+        viewModelScope.launch {
+            repository.addTrackToPlaylist(playlistId, trackId)
+        }
+    }
+
+    fun deleteTrack(track: Track) {
+        viewModelScope.launch {
+            repository.deleteTrack(track.id)
+        }
+    }
+
     fun triggerLibraryScan() {
         viewModelScope.launch {
             isScanning.value = true

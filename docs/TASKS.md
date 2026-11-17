@@ -72,16 +72,16 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 4: Search, Playlists & Song Actions (M4)
-- [ ] Implement instant search screen with 300ms debouncing and highlighted match text.
-- [ ] Build Playlist management: create, rename, delete, add/remove tracks, reorder tracks.
-- [ ] Build Favorites collection with one-tap heart toggle.
-- [ ] Implement contextual Song Actions bottom sheet:
-  - [ ] Play Next / Add to Queue.
-  - [ ] Add to Playlist.
-  - [ ] Go to Artist / Go to Album deep navigation.
-  - [ ] Technical Song Details dialog (bitrate, sample rate, bit depth, container, path).
-  - [ ] Share song (audio file via `FileProvider` or text title-artist).
-  - [ ] Scoped storage song deletion (`MediaStore.createDeleteRequest`).
+- [x] Implement instant search screen with 300ms debouncing and highlighted match text.
+- [x] Build Playlist management: create, rename, delete, add/remove tracks, reorder tracks.
+- [x] Build Favorites collection with one-tap heart toggle.
+- [x] Implement contextual Song Actions bottom sheet:
+  - [x] Play Next / Add to Queue.
+  - [x] Add to Playlist.
+  - [x] Go to Artist / Go to Album deep navigation.
+  - [x] Technical Song Details dialog (bitrate, sample rate, bit depth, container, path).
+  - [x] Share song (audio file via `FileProvider` or text title-artist).
+  - [x] Scoped storage song deletion (`MediaStore.createDeleteRequest`).
 
 ---
 

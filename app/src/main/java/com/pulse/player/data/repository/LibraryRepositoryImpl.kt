@@ -4,6 +4,8 @@ import com.pulse.player.data.local.db.dao.AlbumDao
 import com.pulse.player.data.local.db.dao.ArtistDao
 import com.pulse.player.data.local.db.dao.PlaylistDao
 import com.pulse.player.data.local.db.dao.TrackDao
+import com.pulse.player.data.local.db.entity.PlaylistEntity
+import com.pulse.player.data.local.db.entity.PlaylistTrackEntity
 import com.pulse.player.data.local.mediastore.MediaStoreScanner
 import com.pulse.player.data.local.mediastore.ScanResult
 import com.pulse.player.domain.model.Album
@@ -69,6 +71,36 @@ class LibraryRepositoryImpl @Inject constructor(
 
     override fun getPlaylists(): Flow<List<Playlist>> {
         return playlistDao.getAllPlaylists().map { list -> list.map { it.toDomain() } }
+    }
+
+    override fun getTracksForPlaylist(playlistId: Long): Flow<List<Track>> {
+        return playlistDao.getTracksForPlaylist(playlistId).map { list -> list.map { it.toDomain() } }
+    }
+
+    override suspend fun createPlaylist(name: String): Long {
+        return playlistDao.insertPlaylist(PlaylistEntity(name = name.trim()))
+    }
+
+    override suspend fun deletePlaylist(playlistId: Long) {
+        playlistDao.deletePlaylist(playlistId)
+    }
+
+    override suspend fun addTrackToPlaylist(playlistId: Long, trackId: String) {
+        val currentCount = playlistDao.getTrackCountForPlaylist(playlistId)
+        playlistDao.insertPlaylistTracks(
+            listOf(PlaylistTrackEntity(playlistId = playlistId, trackId = trackId, orderIndex = currentCount))
+        )
+        playlistDao.updatePlaylistTrackCount(playlistId, currentCount + 1)
+    }
+
+    override suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: String) {
+        playlistDao.removeTrackFromPlaylist(playlistId, trackId)
+        val count = playlistDao.getTrackCountForPlaylist(playlistId)
+        playlistDao.updatePlaylistTrackCount(playlistId, count)
+    }
+
+    override suspend fun deleteTrack(trackId: String) {
+        trackDao.deleteTrackById(trackId)
     }
 
     override fun getTracksInFolder(folderPath: String): Flow<List<Track>> {

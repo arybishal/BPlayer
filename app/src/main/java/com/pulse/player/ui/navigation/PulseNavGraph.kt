@@ -37,12 +37,20 @@ fun PulseNavGraph(
             LibraryScreen(
                 onTrackClick = { track, queue ->
                     playbackConnection.playTrack(track, queue)
-                }
+                },
+                onPlayNext = { playbackConnection.playNext(it) },
+                onAddToQueue = { playbackConnection.addToQueue(it) }
             )
         }
 
         composable(Screen.Search.route) {
-            SearchScreen()
+            SearchScreen(
+                onTrackClick = { track, queue ->
+                    playbackConnection.playTrack(track, queue)
+                },
+                onPlayNext = { playbackConnection.playNext(it) },
+                onAddToQueue = { playbackConnection.addToQueue(it) }
+            )
         }
 
         composable(Screen.Settings.route) {

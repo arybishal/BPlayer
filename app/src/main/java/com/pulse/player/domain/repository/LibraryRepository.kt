@@ -25,6 +25,12 @@ interface LibraryRepository {
     fun getArtists(): Flow<List<Artist>>
     fun getFolders(): Flow<List<AudioFolder>>
     fun getPlaylists(): Flow<List<Playlist>>
+    fun getTracksForPlaylist(playlistId: Long): Flow<List<Track>>
+    suspend fun createPlaylist(name: String): Long
+    suspend fun deletePlaylist(playlistId: Long)
+    suspend fun addTrackToPlaylist(playlistId: Long, trackId: String)
+    suspend fun removeTrackFromPlaylist(playlistId: Long, trackId: String)
+    suspend fun deleteTrack(trackId: String)
     fun getTracksInFolder(folderPath: String): Flow<List<Track>>
     fun getTracksForAlbum(albumId: Long): Flow<List<Track>>
     fun getTracksForArtist(artistId: Long): Flow<List<Track>>

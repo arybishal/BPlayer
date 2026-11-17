@@ -19,29 +19,37 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.MusicOff
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -62,6 +71,8 @@ import com.pulse.player.ui.components.AlphabetScrubber
 import com.pulse.player.ui.components.ArtistGridCard
 import com.pulse.player.ui.components.FolderItemRow
 import com.pulse.player.ui.components.PermissionRationaleCard
+import com.pulse.player.ui.components.PlaylistItemRow
+import com.pulse.player.ui.components.SongActionsSheet
 import com.pulse.player.ui.components.TrackItemRow
 import com.pulse.player.ui.theme.LocalExtendedColors
 import kotlinx.coroutines.launch
@@ -69,6 +80,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LibraryScreen(
     onTrackClick: (com.pulse.player.domain.model.Track, List<com.pulse.player.domain.model.Track>) -> Unit = { _, _ -> },
+    onPlayNext: (com.pulse.player.domain.model.Track) -> Unit = {},
+    onAddToQueue: (com.pulse.player.domain.model.Track) -> Unit = {},
     viewModel: LibraryViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -76,6 +89,9 @@ fun LibraryScreen(
     val context = LocalContext.current
     val extendedColors = LocalExtendedColors.current
     val coroutineScope = rememberCoroutineScope()
+    var selectedTrackForActions by remember { mutableStateOf<com.pulse.player.domain.model.Track?>(null) }
+    var showCreatePlaylistDialog by remember { mutableStateOf(false) }
+    var newPlaylistName by remember { mutableStateOf("") }
 
     val permissionToRequest = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -306,7 +322,7 @@ fun LibraryScreen(
                                     track = track,
                                     onTrackClick = { onTrackClick(it, state.tracks) },
                                     onFavoriteClick = { viewModel.toggleFavorite(it) },
-                                    onMoreClick = {}
+                                    onMoreClick = { selectedTrackForActions = it }
                                 )
                             }
                         }
@@ -371,7 +387,61 @@ fun LibraryScreen(
             }
             4 -> {
                 // Playlists Tab
-                EmptyLibraryView(message = "No playlists created yet.")
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Create Playlist Button Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showCreatePlaylistDialog = true }
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = "Create Playlist",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "Create Playlist",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Build custom collections",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = extendedColors.onSurfaceMuted
+                            )
+                        }
+                    }
+
+                    if (state.playlists.isEmpty()) {
+                        EmptyLibraryView(message = "No custom playlists created yet.")
+                    } else {
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(state.playlists, key = { it.id }) { playlist ->
+                                PlaylistItemRow(
+                                    playlist = playlist,
+                                    onPlaylistClick = {},
+                                    onDeletePlaylist = { pl -> viewModel.deletePlaylist(pl.id) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
             5 -> {
                 // Folders Tab
@@ -389,6 +459,65 @@ fun LibraryScreen(
                 }
             }
         }
+    }
+
+    if (showCreatePlaylistDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showCreatePlaylistDialog = false
+                newPlaylistName = ""
+            },
+            title = { Text(text = "New Playlist") },
+            text = {
+                OutlinedTextField(
+                    value = newPlaylistName,
+                    onValueChange = { newPlaylistName = it },
+                    label = { Text("Playlist Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newPlaylistName.isNotBlank()) {
+                            viewModel.createPlaylist(newPlaylistName.trim())
+                            newPlaylistName = ""
+                            showCreatePlaylistDialog = false
+                        }
+                    },
+                    enabled = newPlaylistName.isNotBlank()
+                ) {
+                    Text("Create")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showCreatePlaylistDialog = false
+                        newPlaylistName = ""
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    selectedTrackForActions?.let { track ->
+        SongActionsSheet(
+            track = track,
+            onDismiss = { selectedTrackForActions = null },
+            onPlayNext = { onPlayNext(it) },
+            onAddToQueue = { onAddToQueue(it) },
+            onToggleFavorite = { viewModel.toggleFavorite(it) },
+            playlists = state.playlists,
+            onAddToPlaylist = { playlist, t -> viewModel.addTrackToPlaylist(playlist.id, t.id) },
+            onCreatePlaylistAndAdd = { name, t ->
+                viewModel.createPlaylist(name)
+            },
+            onDeleteRequest = { viewModel.deleteTrack(it) }
+        )
     }
 }
 
