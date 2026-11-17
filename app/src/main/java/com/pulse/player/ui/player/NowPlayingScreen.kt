@@ -172,7 +172,12 @@ fun NowPlayingScreen(
         ) { page ->
             when (page) {
                 0 -> PlayerHeroView(track = track, isPlaying = state.isPlaying)
-                1 -> LyricsPage(track = track)
+                1 -> LyricsPage(
+                    track = track,
+                    currentPositionMs = state.currentPositionMs,
+                    onSeekTo = { playbackConnection.seekTo(it) },
+                    activeAccent = activeAccent
+                )
                 2 -> ArtViewerPage(track = track)
             }
         }

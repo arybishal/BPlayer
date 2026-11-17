@@ -6,6 +6,7 @@ import com.pulse.player.data.local.db.dao.AlbumDao
 import com.pulse.player.data.local.db.dao.ArtistDao
 import com.pulse.player.data.local.db.dao.ErrorLogDao
 import com.pulse.player.data.local.db.dao.GenreDao
+import com.pulse.player.data.local.db.dao.LyricsDao
 import com.pulse.player.data.local.db.dao.PlaylistDao
 import com.pulse.player.data.local.db.dao.QueueDao
 import com.pulse.player.data.local.db.dao.TrackDao
@@ -13,6 +14,7 @@ import com.pulse.player.data.local.db.entity.AlbumEntity
 import com.pulse.player.data.local.db.entity.ArtistEntity
 import com.pulse.player.data.local.db.entity.ErrorLogEntity
 import com.pulse.player.data.local.db.entity.GenreEntity
+import com.pulse.player.data.local.db.entity.LyricsEntity
 import com.pulse.player.data.local.db.entity.PlaylistEntity
 import com.pulse.player.data.local.db.entity.PlaylistTrackEntity
 import com.pulse.player.data.local.db.entity.QueueItemEntity
@@ -27,9 +29,10 @@ import com.pulse.player.data.local.db.entity.TrackEntity
         PlaylistEntity::class,
         PlaylistTrackEntity::class,
         QueueItemEntity::class,
-        ErrorLogEntity::class
+        ErrorLogEntity::class,
+        LyricsEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class PulseDatabase : RoomDatabase() {
@@ -40,6 +43,7 @@ abstract class PulseDatabase : RoomDatabase() {
     abstract fun playlistDao(): PlaylistDao
     abstract fun queueDao(): QueueDao
     abstract fun errorLogDao(): ErrorLogDao
+    abstract fun lyricsDao(): LyricsDao
 
     companion object {
         const val DATABASE_NAME = "pulse_music.db"

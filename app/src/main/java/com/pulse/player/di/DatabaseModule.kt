@@ -7,6 +7,7 @@ import com.pulse.player.data.local.db.dao.AlbumDao
 import com.pulse.player.data.local.db.dao.ArtistDao
 import com.pulse.player.data.local.db.dao.ErrorLogDao
 import com.pulse.player.data.local.db.dao.GenreDao
+import com.pulse.player.data.local.db.dao.LyricsDao
 import com.pulse.player.data.local.db.dao.PlaylistDao
 import com.pulse.player.data.local.db.dao.QueueDao
 import com.pulse.player.data.local.db.dao.TrackDao
@@ -55,4 +56,7 @@ object DatabaseModule {
 
     @Provides
     fun provideErrorLogDao(database: PulseDatabase): ErrorLogDao = database.errorLogDao()
+
+    @Provides
+    fun provideLyricsDao(database: PulseDatabase): LyricsDao = database.lyricsDao()
 }

@@ -86,15 +86,15 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 5: Synchronized & Online Lyrics (M5)
-- [ ] Implement ID3 embedded lyrics reader (`USLT` / `SYLT` frames via JAudioTagger).
-- [ ] Implement local sidecar `.lrc` file reader and parser with high-precision timestamp sorting.
-- [ ] Build synchronized lyrics UI:
-  - [ ] Active line glow and vertical center auto-scrolling.
-  - [ ] Tap-to-seek to jump audio position to tapped line.
-- [ ] Implement LRCLIB API client for fetching synchronized and plain text lyrics online.
-- [ ] Implement Room `lyrics_cache` table to persist lyrics offline.
-- [ ] Integrate optional Gemini AI fallback for missing lyrics with clear `⚠️ AI-Generated (Unverified)` badge.
-- [ ] Build in-app lyrics editor allowing users to fix timestamps or write text.
+- [x] Implement ID3 embedded lyrics reader (`USLT` / `SYLT` frames via JAudioTagger).
+- [x] Implement local sidecar `.lrc` file reader and parser with high-precision timestamp sorting.
+- [x] Build synchronized lyrics UI:
+  - [x] Active line glow and vertical center auto-scrolling.
+  - [x] Tap-to-seek to jump audio position to tapped line.
+- [x] Implement LRCLIB API client for fetching synchronized and plain text lyrics online.
+- [x] Implement Room `lyrics_cache` table to persist lyrics offline.
+- [x] Integrate optional Gemini AI fallback for missing lyrics with clear `⚠️ AI-Generated (Unverified)` badge.
+- [x] Build in-app lyrics editor allowing users to fix timestamps or write text.
 
 ---
 
