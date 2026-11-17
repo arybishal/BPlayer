@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pulse.player.data.local.datastore.PreferencesManager
 import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
 import com.pulse.player.service.sleeptimer.SleepTimerManager
@@ -32,6 +33,7 @@ import com.pulse.player.ui.navigation.PulseNavGraph
 import com.pulse.player.ui.navigation.Screen
 import com.pulse.player.ui.player.NowPlayingScreen
 import com.pulse.player.ui.theme.PulseTheme
+import com.pulse.player.ui.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -47,12 +49,23 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var sleepTimerManager: SleepTimerManager
 
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
-            PulseTheme {
+            val themeMode by preferencesManager.themeModeFlow.collectAsState(initial = ThemeMode.DARK)
+            val fontScale by preferencesManager.fontScaleFlow.collectAsState(initial = 1.0f)
+            val isGlassEnabled by preferencesManager.liquidGlassFlow.collectAsState(initial = true)
+
+            PulseTheme(
+                themeMode = themeMode,
+                fontScale = fontScale,
+                isGlassEnabled = isGlassEnabled
+            ) {
                 PulseAppContent(
                     playbackConnection = playbackConnection,
                     audioEffectsController = audioEffectsController,
@@ -111,6 +124,8 @@ fun PulseAppContent(
                 PulseNavGraph(
                     navController = navController,
                     playbackConnection = playbackConnection,
+                    audioEffectsController = audioEffectsController,
+                    sleepTimerManager = sleepTimerManager,
                     modifier = Modifier.fillMaxSize()
                 )
 

@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
+import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.home.HomeScreen
 import com.pulse.player.ui.library.LibraryScreen
 import com.pulse.player.ui.search.SearchScreen
@@ -16,6 +18,8 @@ import com.pulse.player.ui.settings.logs.ErrorLogsScreen
 fun PulseNavGraph(
     navController: NavHostController,
     playbackConnection: PlaybackConnection,
+    audioEffectsController: AudioEffectsController? = null,
+    sleepTimerManager: SleepTimerManager? = null,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -57,7 +61,9 @@ fun PulseNavGraph(
             SettingsScreen(
                 onNavigateToErrorLogs = {
                     navController.navigate(Screen.ErrorLogs.route)
-                }
+                },
+                audioEffectsController = audioEffectsController,
+                sleepTimerManager = sleepTimerManager
             )
         }
 

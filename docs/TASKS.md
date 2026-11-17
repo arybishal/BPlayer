@@ -122,22 +122,22 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 8. Milestone 8: Settings, Theming & Battery Optimization (M8)
-- [ ] Build Appearance settings:
-  - [ ] Theme switcher: Light, Dark, System, AMOLED Black.
-  - [ ] Font size slider (85% to 140%) scaling typography dynamically.
-  - [ ] Background style: Solid, Album-art blurred, Custom image, Dynamic color.
-  - [ ] Liquid Glass effect toggle.
-  - [ ] Curated accent color picker (Amber, Coral, Emerald).
-- [ ] Build Playback settings:
-  - [ ] Smart Previous behavior toggle.
-  - [ ] Gapless playback toggle and crossfade slider (0–10s).
-- [ ] Build Battery & Background Playback settings:
-  - [ ] Battery exemption status indicator.
-  - [ ] "Allow Unrestricted Battery Use" action triggering system request.
-  - [ ] OEM background setup guides (Xiaomi, Samsung, OnePlus, Oppo, Vivo, Huawei).
-- [ ] Build Online settings:
-  - [ ] Encrypted Gemini API key storage and "Test Key" ping.
-  - [ ] Lyrics and artwork source prioritization order.
+- [x] Build Appearance settings:
+  - [x] Theme switcher: Light, Dark, System, AMOLED Black.
+  - [x] Font size slider (85% to 140%) scaling typography dynamically.
+  - [x] Background style: Solid, Album-art blurred, Custom image, Dynamic color.
+  - [x] Liquid Glass effect toggle.
+  - [x] Curated accent color picker (Amber, Coral, Emerald).
+- [x] Build Playback settings:
+  - [x] Smart Previous behavior toggle.
+  - [x] Gapless playback toggle and crossfade slider (0–10s).
+- [x] Build Battery & Background Playback settings:
+  - [x] Battery exemption status indicator.
+  - [x] "Allow Unrestricted Battery Use" action triggering system request.
+  - [x] OEM background setup guides (Xiaomi, Samsung, OnePlus, Oppo, Vivo, Huawei).
+- [x] Build Online settings:
+  - [x] Encrypted Gemini API key storage and "Test Key" ping.
+  - [x] Lyrics and artwork source prioritization order.
 
 ---
 
