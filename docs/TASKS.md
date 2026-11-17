@@ -57,17 +57,17 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 3: Hero Now Playing Screen & Polish (M3)
-- [ ] Implement full-screen modal Now Playing container with collapse gesture (swipe down / back).
-- [ ] Build `HorizontalPager` with 3 dedicated pages and dot indicator:
-  - [ ] Page 1: Hero Player View (giant cover, typography, seek bar, transport pod).
-  - [ ] Page 2: Synchronized Lyrics View.
-  - [ ] Page 3: High-Res Album Art Viewer.
-- [ ] Implement AndroidX Palette dynamic color extraction with WCAG AA contrast enforcement.
-- [ ] Implement shared-element bounds transition between Mini Player artwork and Now Playing hero artwork.
-- [ ] Add micro-interactions:
-  - [ ] Animated play/pause icon morph.
-  - [ ] Heart favorite button particle burst.
-  - [ ] Subtle album art breathing scale between playing and paused states.
+- [x] Implement full-screen modal Now Playing container with collapse gesture (swipe down / back).
+- [x] Build `HorizontalPager` with 3 dedicated pages and dot indicator:
+  - [x] Page 1: Hero Player View (giant cover, typography, seek bar, transport pod).
+  - [x] Page 2: Synchronized Lyrics View.
+  - [x] Page 3: High-Res Album Art Viewer.
+- [x] Implement AndroidX Palette dynamic color extraction with WCAG AA contrast enforcement.
+- [x] Implement shared-element bounds transition between Mini Player artwork and Now Playing hero artwork.
+- [x] Add micro-interactions:
+  - [x] Animated play/pause icon morph.
+  - [x] Heart favorite button particle burst.
+  - [x] Subtle album art breathing scale between playing and paused states.
 
 ---
 

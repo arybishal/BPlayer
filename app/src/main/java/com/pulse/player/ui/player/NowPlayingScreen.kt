@@ -1,6 +1,9 @@
 package com.pulse.player.ui.player
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -11,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +23,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Favorite
@@ -42,11 +43,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -61,6 +70,9 @@ import com.pulse.player.ui.components.HeroSeekBar
 import com.pulse.player.ui.theme.HeroAlbumArtShape
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
+import com.pulse.player.util.palette.PaletteExtractor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun NowPlayingScreen(
@@ -71,8 +83,23 @@ fun NowPlayingScreen(
     val state by playbackConnection.playbackState.collectAsState()
     val track = state.currentTrack ?: return
     val extendedColors = LocalExtendedColors.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
+    var dynamicAccent by remember { mutableStateOf<Color?>(null) }
+    LaunchedEffect(track.artworkUri) {
+        dynamicAccent = PaletteExtractor.extractAccentFromArtwork(context, track.artworkUri)
+    }
+
+    val activeAccent = dynamicAccent ?: MaterialTheme.colorScheme.primary
     val pagerState = rememberPagerState(pageCount = { 3 })
+
+    var heartScaleTarget by remember { mutableFloatStateOf(1.0f) }
+    val heartScale by animateFloatAsState(
+        targetValue = heartScaleTarget,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "heartBurst"
+    )
 
     Column(
         modifier = modifier
@@ -134,7 +161,7 @@ fun NowPlayingScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // 3-Page Horizontal Pager
         HorizontalPager(
@@ -144,41 +171,9 @@ fun NowPlayingScreen(
                 .fillMaxWidth()
         ) { page ->
             when (page) {
-                0 -> {
-                    // Page 1: Hero Player Page
-                    PlayerHeroView(
-                        track = track,
-                        isPlaying = state.isPlaying
-                    )
-                }
-                1 -> {
-                    // Page 2: Lyrics View
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Synchronized Lyrics\n(Swipe back for Player)",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = extendedColors.onSurfaceMuted,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                2 -> {
-                    // Page 3: Full Art Viewer
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Full Resolution Album Art\n(Swipe back for Player)",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = extendedColors.onSurfaceMuted,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                0 -> PlayerHeroView(track = track, isPlaying = state.isPlaying)
+                1 -> LyricsPage(track = track)
+                2 -> ArtViewerPage(track = track)
             }
         }
 
@@ -207,7 +202,7 @@ fun NowPlayingScreen(
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = "Toggle Shuffle",
-                    tint = if (state.isShuffleEnabled) MaterialTheme.colorScheme.primary else extendedColors.onSurfaceMuted,
+                    tint = if (state.isShuffleEnabled) activeAccent else extendedColors.onSurfaceMuted,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -230,7 +225,7 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .size(76.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(activeAccent),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(
@@ -245,7 +240,7 @@ fun NowPlayingScreen(
                         Icon(
                             imageVector = if (playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                             contentDescription = if (playing) "Pause" else "Play",
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = Color.Black,
                             modifier = Modifier.size(42.dp)
                         )
                     }
@@ -275,7 +270,7 @@ fun NowPlayingScreen(
                     else -> Icons.Rounded.Repeat
                 }
                 val tint = if (state.repeatState != RepeatState.OFF) {
-                    MaterialTheme.colorScheme.primary
+                    activeAccent
                 } else {
                     extendedColors.onSurfaceMuted
                 }
@@ -297,14 +292,20 @@ fun NowPlayingScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = {},
+                onClick = {
+                    coroutineScope.launch {
+                        heartScaleTarget = 1.4f
+                        delay(150)
+                        heartScaleTarget = 1.0f
+                    }
+                },
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
                     imageVector = if (track.isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                     contentDescription = "Favorite",
                     tint = if (track.isFavorite) StatusDanger else extendedColors.onSurfaceMuted,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp).scale(heartScale)
                 )
             }
 
@@ -347,7 +348,7 @@ fun NowPlayingScreen(
                         .size(if (isSelected) 8.dp else 6.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isSelected) MaterialTheme.colorScheme.primary
+                            if (isSelected) activeAccent
                             else extendedColors.onSurfaceSubtle
                         )
                 )
@@ -363,6 +364,13 @@ private fun PlayerHeroView(
 ) {
     val extendedColors = LocalExtendedColors.current
 
+    // Subtle album art breathing scale
+    val artScale by animateFloatAsState(
+        targetValue = if (isPlaying) 1.0f else 0.94f,
+        animationSpec = spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow),
+        label = "artBreathingScale"
+    )
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -372,6 +380,7 @@ private fun PlayerHeroView(
         Box(
             modifier = Modifier
                 .size(280.dp)
+                .scale(artScale)
                 .clip(HeroAlbumArtShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
