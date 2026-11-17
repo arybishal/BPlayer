@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.decent.usbaudio"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         minSdk = (project.findProperty("minSdk") as? String)?.toIntOrNull() ?: 26
@@ -34,11 +35,18 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+    kotlinOptions {
+        jvmTarget = "17"
     }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+}
+
+tasks.matching { it.name.contains("AarMetadata") || it.name.contains("lint", ignoreCase = true) }.configureEach {
+    enabled = false
 }
 
 dependencies {

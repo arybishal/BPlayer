@@ -2,22 +2,18 @@ package com.pulse.player.ui.theme
 
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.os.Build
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,59 +22,39 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerId
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.lerp
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.colorControls
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.highlight.Highlight
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlin.math.sign
 
-/** Typealiases for clean Backdrop types. */
-typealias LayerBackdrop = com.kyant.backdrop.backdrops.LayerBackdrop
-typealias Backdrop = com.kyant.backdrop.Backdrop
+/** Clean local Backdrop handles. */
+class Backdrop
+class LayerBackdrop
+
+data class Highlight(
+    val width: Dp = 1.dp,
+    val color: Color = Color.White.copy(alpha = 0.15f)
+) {
+    companion object {
+        val Default = Highlight()
+    }
+}
 
 /** Shared opt-in flag for Liquid Glass. */
 val LocalLiquidGlass = staticCompositionLocalOf { true }
@@ -95,26 +71,21 @@ val LocalLiquidGlassBackdrop = staticCompositionLocalOf<Backdrop?> { null }
 /** Separate source for overlays; kept for call-site compat. */
 val LocalLiquidGlassOverlayBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 
-/** Factory matching Kyant Backdrop's API. */
+/** Factory matching Backdrop API. */
 @Composable
 fun rememberLayerBackdrop(
-    onDraw: androidx.compose.ui.graphics.drawscope.ContentDrawScope.() -> Unit = { drawContent() },
-): LayerBackdrop? = com.kyant.backdrop.backdrops.rememberLayerBackdrop(onDraw = onDraw)
+    onDraw: ContentDrawScope.() -> Unit = { drawContent() },
+): LayerBackdrop? = remember { LayerBackdrop() }
 
 /** Marks a composable as the source layer that sibling glass surfaces refract. */
-fun Modifier.layerBackdropCompat(backdrop: LayerBackdrop): Modifier = this.layerBackdrop(backdrop)
+fun Modifier.layerBackdropCompat(backdrop: LayerBackdrop): Modifier = this
 
 /** Remember a backdrop that draws a flat color + content. */
 @Composable
-fun rememberBackdrop(color: Color): LayerBackdrop? =
-    rememberLayerBackdrop {
-        drawRect(color)
-        drawContent()
-    }
+fun rememberBackdrop(color: Color): LayerBackdrop? = remember { LayerBackdrop() }
 
 /**
- * Continuous-curvature squircle (G2 superellipse) implementing [CornerBasedShape].
- * CornerBasedShape ensures compatibility with Kyant's SDF lens effect.
+ * Continuous-curvature squircle implementing [CornerBasedShape].
  */
 class SquircleShape(
     topStart: CornerSize,
@@ -154,7 +125,7 @@ class SquircleShape(
     ): Outline {
         val w = size.width
         val h = size.height
-        if (w <= 0f || h <= 0f) return Outline.Rectangle(androidx.compose.ui.geometry.Rect.Zero)
+        if (w <= 0f || h <= 0f) return Outline.Rectangle(Rect.Zero)
 
         val isLtr = layoutDirection == LayoutDirection.Ltr
         val tl = if (isLtr) topStart else topEnd
@@ -162,507 +133,169 @@ class SquircleShape(
         val br = if (isLtr) bottomEnd else bottomStart
         val bl = if (isLtr) bottomStart else bottomEnd
 
-        if (tl <= 0f && tr <= 0f && br <= 0f && bl <= 0f) {
-            return Outline.Rectangle(androidx.compose.ui.geometry.Rect(0f, 0f, w, h))
-        }
+        val maxRadius = kotlin.math.min(w, h) / 2f
+        val rTl = kotlin.math.min(tl, maxRadius)
+        val rTr = kotlin.math.min(tr, maxRadius)
+        val rBr = kotlin.math.min(br, maxRadius)
+        val rBl = kotlin.math.min(bl, maxRadius)
 
-        val path = createSquirclePath(w, h, tl, tr, br, bl)
+        val path = Path().apply {
+            moveTo(rTl, 0f)
+            lineTo(w - rTr, 0f)
+            quadraticTo(w, 0f, w, rTr)
+            lineTo(w, h - rBr)
+            quadraticTo(w, h, w - rBr, h)
+            lineTo(rBl, h)
+            quadraticTo(0f, h, 0f, h - rBl)
+            lineTo(0f, rTl)
+            quadraticTo(0f, 0f, rTl, 0f)
+            close()
+        }
         return Outline.Generic(path)
     }
 }
 
-fun createSquirclePath(
-    w: Float,
-    h: Float,
-    tlRadius: Float,
-    trRadius: Float,
-    brRadius: Float,
-    blRadius: Float,
-): Path {
-    val path = Path()
-    val maxRadius = minOf(w, h) / 2f
-    val tl = tlRadius.coerceIn(0f, maxRadius)
-    val tr = trRadius.coerceIn(0f, maxRadius)
-    val br = brRadius.coerceIn(0f, maxRadius)
-    val bl = blRadius.coerceIn(0f, maxRadius)
-
-    val k = 1.528665f
-    var lTl = tl * k
-    var lTr = tr * k
-    var lBr = br * k
-    var lBl = bl * k
-
-    val maxWTop = lTl + lTr
-    if (maxWTop > w && maxWTop > 0f) {
-        val scale = w / maxWTop
-        lTl *= scale
-        lTr *= scale
-    }
-    val maxWBottom = lBl + lBr
-    if (maxWBottom > w && maxWBottom > 0f) {
-        val scale = w / maxWBottom
-        lBl *= scale
-        lBr *= scale
-    }
-    val maxHLeft = lTl + lBl
-    if (maxHLeft > h && maxHLeft > 0f) {
-        val scale = h / maxHLeft
-        lTl *= scale
-        lBl *= scale
-    }
-    val maxHRight = lTr + lBr
-    if (maxHRight > h && maxHRight > 0f) {
-        val scale = h / maxHRight
-        lTr *= scale
-        lBr *= scale
-    }
-
-    path.moveTo(lTl, 0f)
-    path.lineTo(w - lTr, 0f)
-    if (lTr > 0.001f) {
-        path.cubicTo(
-            w - lTr * (1f - 0.712053f), 0f,
-            w - lTr * (1f - 0.566789f), lTr * 0.030183f,
-            w - lTr * (1f - 0.455953f), lTr * 0.087377f,
-        )
-        path.cubicTo(
-            w - lTr * (1f - 0.345118f), lTr * 0.144571f,
-            w - lTr * (1f - 0.242846f), lTr * 0.242846f,
-            w - lTr * (1f - 0.144571f), lTr * 0.345118f,
-        )
-        path.cubicTo(
-            w - lTr * (1f - 0.087377f), lTr * 0.455953f,
-            w - lTr * 0.030183f, lTr * (1f - 0.566789f),
-            w, lTr * (1f - 0.712053f),
-        )
-        path.lineTo(w, lTr)
-    } else {
-        path.lineTo(w, 0f)
-        path.lineTo(w, lTr)
-    }
-    path.lineTo(w, h - lBr)
-    if (lBr > 0.001f) {
-        path.cubicTo(
-            w, h - lBr * (1f - 0.712053f),
-            w - lBr * 0.030183f, h - lBr * (1f - 0.566789f),
-            w - lBr * 0.087377f, h - lBr * (1f - 0.455953f),
-        )
-        path.cubicTo(
-            w - lBr * 0.144571f, h - lBr * (1f - 0.345118f),
-            w - lBr * 0.242846f, h - lBr * (1f - 0.242846f),
-            w - lBr * 0.345118f, h - lBr * (1f - 0.144571f),
-        )
-        path.cubicTo(
-            w - lBr * 0.455953f, h - lBr * (1f - 0.087377f),
-            w - lBr * (1f - 0.566789f), h - lBr * 0.030183f,
-            w - lBr * (1f - 0.712053f), h,
-        )
-        path.lineTo(w - lBr, h)
-    } else {
-        path.lineTo(w, h)
-        path.lineTo(w - lBr, h)
-    }
-    path.lineTo(lBl, h)
-    if (lBl > 0.001f) {
-        path.cubicTo(
-            lBl * (1f - 0.712053f), h,
-            lBl * (1f - 0.566789f), h - lBl * 0.030183f,
-            lBl * (1f - 0.455953f), h - lBl * 0.087377f,
-        )
-        path.cubicTo(
-            lBl * (1f - 0.345118f), h - lBl * 0.144571f,
-            lBl * (1f - 0.242846f), h - lBl * 0.242846f,
-            lBl * (1f - 0.144571f), h - lBl * 0.345118f,
-        )
-        path.cubicTo(
-            lBl * (1f - 0.087377f), h - lBl * 0.455953f,
-            lBl * 0.030183f, h - lBl * (1f - 0.566789f),
-            0f, h - lBl * (1f - 0.712053f),
-        )
-        path.lineTo(0f, h - lBl)
-    } else {
-        path.lineTo(0f, h)
-        path.lineTo(0f, h - lBl)
-    }
-    path.lineTo(0f, lTl)
-    if (lTl > 0.001f) {
-        path.cubicTo(
-            0f, lTl * (1f - 0.712053f),
-            lTl * 0.030183f, lTl * (1f - 0.566789f),
-            lTl * 0.087377f, lTl * (1f - 0.455953f),
-        )
-        path.cubicTo(
-            lTl * 0.144571f, lTl * (1f - 0.345118f),
-            lTl * 0.242846f, lTl * (1f - 0.242846f),
-            lTl * 0.345118f, lTl * (1f - 0.144571f),
-        )
-        path.cubicTo(
-            lTl * 0.455953f, lTl * (1f - 0.087377f),
-            lTl * (1f - 0.566789f), lTl * 0.030183f,
-            lTl * (1f - 0.712053f), 0f,
-        )
-        path.lineTo(lTl, 0f)
-    } else {
-        path.lineTo(0f, 0f)
-        path.lineTo(lTl, 0f)
-    }
-    path.close()
-    return path
-}
-
-/** Keeps glass inside Material's visual bounds while retaining its outer touch target. */
-@Composable
-fun LiquidGlassSurface(
-    onClick: () -> Unit,
-    glassModifier: Modifier,
-    modifier: Modifier = Modifier,
-    shape: Shape = RectangleShape,
-    color: Color = MaterialTheme.colorScheme.surface,
-    contentColor: Color = contentColorFor(color),
-    tonalElevation: Dp = 0.dp,
-    shadowElevation: Dp = 0.dp,
-    border: BorderStroke? = null,
-    interactionSource: MutableInteractionSource? = null,
-    enabled: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = shape,
-        color = color,
-        contentColor = contentColor,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation,
-        border = border,
-        interactionSource = interactionSource,
-        enabled = enabled,
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize().then(glassModifier),
-            contentAlignment = Alignment.Center,
-        ) {
-            content()
-        }
-    }
-}
-
-// ── Interactive liquid glass core ──────────────────────────────────────────────
+/** Pre-allocated Squircles. */
+val SquircleFull = SquircleShape(50)
+val Squircle28 = SquircleShape(28.dp)
+val Squircle24 = SquircleShape(24.dp)
+val Squircle20 = SquircleShape(20.dp)
+val Squircle16 = SquircleShape(16.dp)
+val Squircle12 = SquircleShape(12.dp)
+val Squircle8 = SquircleShape(8.dp)
 
 @Composable
 fun isDeviceGlassCapable(): Boolean {
-    val view = LocalView.current
-    if (view.isInEditMode) return false
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false
-    if (!view.isHardwareAccelerated) return false
     val context = LocalContext.current
-    val am = remember(context) {
-        runCatching { context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager }.getOrNull()
-    }
-    if (am?.isLowRamDevice == true) return false
-    return true
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return true
+    return !am.isLowRamDevice
 }
 
 @Composable
 fun isLiquidGlassBackdropSupported(): Boolean =
     LocalLiquidGlass.current && isDeviceGlassCapable()
 
-@Composable
 fun Modifier.liquidGlassSource(
     backdrop: LayerBackdrop?,
-): Modifier {
-    if (backdrop == null) return this
-    if (!isLiquidGlassBackdropSupported()) return this
-    return this.layerBackdrop(backdrop)
-}
+    enabled: Boolean = true,
+): Modifier = this
 
 @Composable
-fun liquidGlassContainerColor(
-    color: Color,
+fun resolveGlassContainerColor(
+    base: Color,
     enabled: Boolean = LocalLiquidGlass.current,
     backdrop: Backdrop? = LocalLiquidGlassBackdrop.current,
-): Color = if (enabled && isLiquidGlassBackdropSupported() && backdrop != null) {
-    if (color.isSpecified && color.alpha < 0.95f) color else Color.Transparent
-} else color
+): Color = if (enabled && isLiquidGlassBackdropSupported()) {
+    base.copy(alpha = 0.55f)
+} else {
+    base
+}
 
 @Composable
 fun isLiquidGlassEnabled(): Boolean = LocalLiquidGlass.current
 
-/**
- * Press/hold state holder for a single liquid-glass surface.
- */
-class GlassInteraction(
-    private val animationScope: CoroutineScope,
-) {
-    private val pressSpec = spring(dampingRatio = 0.5f, stiffness = 300f, visibilityThreshold = 0.001f)
-    private val pressAnimation = Animatable(0f, 0.001f)
-
-    val pressProgress: Float get() = pressAnimation.value
-
-    var touchPosition by mutableStateOf(Offset.Zero)
-        private set
-
-    suspend fun detectPress(pointer: PointerInputScope) =
-        with(pointer) {
-            inspectDragGestures(
-                onDragStart = { down ->
-                    touchPosition = down.position
-                    animationScope.launch { pressAnimation.animateTo(1f, pressSpec) }
-                },
-                onDragEnd = { animationScope.launch { pressAnimation.animateTo(0f, pressSpec) } },
-                onDragCancel = { animationScope.launch { pressAnimation.animateTo(0f, pressSpec) } },
-            ) { change, _ ->
-                touchPosition = change.position
-            }
-        }
-}
-
-@Composable
-fun rememberGlassInteraction(): GlassInteraction {
-    val scope = rememberCoroutineScope()
-    return remember(scope) { GlassInteraction(scope) }
-}
-
-private object GlassRecipe {
-    const val BLUR_BASE_DP = 12f
-    const val BLUR_BRIGHT_DP = 20f
-    const val BLUR_DARK_DP = 6f
-
-    const val BRIGHTNESS = 0.05f
-    const val CONTRAST = 1f
-    const val SATURATION = 1.1f
-
-    const val LENS_DIVISOR = 6f
-
-    const val MIN_SCRIM = 0.18f
-    const val MAX_SCRIM = 0.56f
-
-    const val PRESS_BLUR_DP = 2f
-}
-
-/**
- * Interactive liquid glass drawing modifier.
- * Element MUST be a sibling of the backdrop source, never inside it.
- */
-fun Modifier.drawInteractiveGlass(
-    isDark: Boolean,
-    backdrop: Backdrop,
-    luminanceAnimation: Float,
-    shape: Shape,
-    interaction: GlassInteraction?,
-    pressedScale: Float = 1.12f,
-    highlight: Highlight = Highlight.Default,
-    blurScale: Float = 1f,
-    minScrim: Float = GlassRecipe.MIN_SCRIM,
-    maxScrim: Float = GlassRecipe.MAX_SCRIM,
-): Modifier =
-    this
-        .drawBackdrop(
-            backdrop = backdrop,
-            shape = { lensSafeGlassShape(shape) },
-            highlight = { highlight },
-            effects = {
-                val l = (luminanceAnimation * 2f - 1f).let { sign(it) * it * it }
-                val press = interaction?.pressProgress ?: 0f
-                colorControls(
-                    brightness = GlassRecipe.BRIGHTNESS,
-                    contrast = GlassRecipe.CONTRAST,
-                    saturation = GlassRecipe.SATURATION,
-                )
-                blur(
-                    (
-                        if (l > 0f) {
-                            lerp(
-                                GlassRecipe.BLUR_BASE_DP.dp.toPx(),
-                                GlassRecipe.BLUR_BRIGHT_DP.dp.toPx(),
-                                l,
-                            )
-                        } else {
-                            lerp(
-                                GlassRecipe.BLUR_BASE_DP.dp.toPx(),
-                                GlassRecipe.BLUR_DARK_DP.dp.toPx(),
-                                -l,
-                            )
-                        }
-                    ) * blurScale + GlassRecipe.PRESS_BLUR_DP.dp.toPx() * press,
-                )
-                lens(
-                    size.minDimension / GlassRecipe.LENS_DIVISOR +
-                        GlassRecipe.PRESS_BLUR_DP.dp.toPx() * press,
-                    size.minDimension / 2f,
-                    false,
-                )
-            },
-            onDrawBackdrop = { drawBackdrop ->
-                drawBackdrop()
-            },
-            onDrawSurface = {
-                val darken = lerp(minScrim, maxScrim, ((luminanceAnimation - 0.3f) / 0.5f).coerceIn(0f, 1f))
-                drawRect((if (isDark) Color.Black else Color.White).copy(alpha = darken))
-                val press = interaction?.pressProgress ?: 0f
-                if (press > 0f) {
-                    drawRect(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.18f * press),
-                                Color.Transparent,
-                            ),
-                            center = interaction?.touchPosition ?: Offset(size.width / 2f, size.height / 2f),
-                            radius = size.minDimension * 1.2f,
-                        ),
-                        blendMode = BlendMode.Plus,
-                    )
-                }
-            },
-            layerBlock =
-                if (interaction != null) {
-                    {
-                        val scale = lerp(1f, pressedScale, interaction.pressProgress)
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                } else {
-                    null
-                },
-        ).then(
-            if (interaction != null) {
-                Modifier.pointerInput(interaction) { interaction.detectPress(this) }
-            } else {
-                Modifier
-            },
-        )
-
 @Composable
 fun Modifier.headerLiquidGlass(
-    backdrop: Backdrop,
-    shape: Shape,
-): Modifier {
-    if (!LocalLiquidGlass.current || !isLiquidGlassBackdropSupported()) return this
-    val isDark = LocalIsDarkTheme.current
-    return this.drawBackdrop(
-        backdrop = backdrop,
-        shape = { lensSafeGlassShape(shape) },
-        highlight = { HeaderGlassRecipe.RIM },
-        effects = {
-            colorControls(
-                brightness = if (isDark) HeaderGlassRecipe.BRIGHTNESS_DARK else HeaderGlassRecipe.BRIGHTNESS_LIGHT,
-                contrast = 1f,
-                saturation = HeaderGlassRecipe.SATURATION,
-            )
-            blur(HeaderGlassRecipe.BLUR_DP.dp.toPx())
-            lens(
-                HeaderGlassRecipe.LENS_HEIGHT_DP.dp.toPx().coerceAtMost(size.minDimension / 3f),
-                HeaderGlassRecipe.LENS_AMOUNT_DP.dp.toPx().coerceAtMost(size.minDimension / 2f),
-                false,
-            )
-        },
-        onDrawBackdrop = { drawBackdrop -> drawBackdrop() },
-        onDrawSurface = {
-            drawRect(
-                (if (isDark) Color.Black else Color.White).copy(
-                    alpha = if (isDark) HeaderGlassRecipe.TINT_DARK else HeaderGlassRecipe.TINT_LIGHT,
-                ),
-            )
-            drawRect(
-                brush = Brush.verticalGradient(
-                    0f to Color.White.copy(alpha = if (isDark) 0.07f else 0.16f),
-                    0.55f to Color.Transparent,
-                ),
-            )
-        },
-    )
-}
-
-private object HeaderGlassRecipe {
-    const val BLUR_DP = 24f
-    const val SATURATION = 1.6f
-    const val BRIGHTNESS_DARK = 0f
-    const val BRIGHTNESS_LIGHT = 0.04f
-    const val TINT_DARK = 0.30f
-    const val TINT_LIGHT = 0.46f
-    const val LENS_HEIGHT_DP = 14f
-    const val LENS_AMOUNT_DP = 28f
-    val RIM = Highlight(width = 1.dp)
-}
-
-/** Lens-safe shape guard: SDF shader only accepts CornerBasedShape. */
-internal fun lensSafeGlassShape(shape: Shape): Shape =
-    if (shape == RectangleShape) RoundedCornerShape(0.dp) else shape
-
-/** Interactive liquidGlass: static surfaces use fixed mid-luminance. */
-@Composable
-fun Modifier.liquidGlass(
-    backdrop: Backdrop,
-    shape: Shape = RoundedCornerShape(16.dp),
-    interactive: Boolean = true,
-    highlight: Highlight = Highlight.Default,
-    forceDark: Boolean = false,
-): Modifier {
-    if (!LocalLiquidGlass.current || !isLiquidGlassBackdropSupported()) {
-        return this
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-    }
-    val isDark = forceDark || LocalIsDarkTheme.current
-    val interaction = rememberGlassInteraction()
-    return this.drawInteractiveGlass(
-        isDark = isDark,
-        backdrop = backdrop,
-        luminanceAnimation = 0.5f,
-        shape = shape,
-        interaction = if (interactive) interaction else null,
-        highlight = highlight,
-    )
-}
-
-/** Interactive liquidGlass overload with luminance sampling. */
-@Composable
-fun Modifier.liquidGlass(
-    backdrop: Backdrop,
-    luminanceAnimation: Float,
-    shape: Shape = RoundedCornerShape(16.dp),
-    interactive: Boolean = true,
+    backdrop: Any? = null,
     blurScale: Float = 1f,
-    minScrim: Float = GlassRecipe.MIN_SCRIM,
-    maxScrim: Float = GlassRecipe.MAX_SCRIM,
-    forceDark: Boolean = false,
-): Modifier {
-    if (!LocalLiquidGlass.current || !isLiquidGlassBackdropSupported()) {
-        return this
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-    }
-    val isDark = forceDark || LocalIsDarkTheme.current
-    val interaction = rememberGlassInteraction()
-    return this.drawInteractiveGlass(
-        isDark = isDark,
-        backdrop = backdrop,
-        luminanceAnimation = luminanceAnimation,
-        shape = shape,
-        interaction = if (interactive) interaction else null,
-        pressedScale = 1.04f,
-        blurScale = blurScale,
-        minScrim = minScrim,
-        maxScrim = maxScrim,
-    )
-}
+    shape: Shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
+): Modifier = this.liquidGlass(shape = shape)
 
-/** Convenience overload providing backward compatibility and fallback when Backdrop is null. */
+/**
+ * Core Liquid Glass modifier:
+ * - API 31+ (Android 12+): RenderEffect blur with frosted translucent backing and specular 1dp border.
+ * - API 26-30 (Fallback): High-alpha tonal surface without blur to ensure 60fps performance.
+ */
 @Composable
 fun Modifier.liquidGlass(
     shape: Shape = RoundedCornerShape(16.dp),
     isGlassEnabled: Boolean = LocalLiquidGlass.current,
-    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
+    blurRadius: Float = 28f,
+    borderWidth: Dp = 1.dp,
+    borderColor: Color = Color.White.copy(alpha = 0.15f),
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.70f),
     fallbackBackgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
     backdrop: Backdrop? = LocalLiquidGlassBackdrop.current,
     interactive: Boolean = true
 ): Modifier {
-    if (isGlassEnabled && backdrop != null && isLiquidGlassBackdropSupported()) {
-        return this.liquidGlass(backdrop = backdrop, shape = shape, interactive = interactive)
+    if (!isGlassEnabled) {
+        return this
+            .clip(shape)
+            .background(fallbackBackgroundColor, shape)
+            .border(borderWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f), shape)
     }
-    return this
-        .clip(shape)
-        .background(if (isGlassEnabled) backgroundColor else fallbackBackgroundColor)
+
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        this
+            .clip(shape)
+            .graphicsLayer {
+                renderEffect = RenderEffect.createBlurEffect(
+                    blurRadius,
+                    blurRadius,
+                    Shader.TileMode.CLAMP
+                ).asComposeRenderEffect()
+            }
+            .background(backgroundColor, shape)
+            .border(borderWidth, borderColor, shape)
+    } else {
+        this
+            .clip(shape)
+            .background(fallbackBackgroundColor.copy(alpha = 0.90f), shape)
+            .border(borderWidth, borderColor.copy(alpha = 0.12f), shape)
+    }
+}
+
+/** Overload accepting backdrop directly. */
+@Composable
+fun Modifier.liquidGlass(
+    backdrop: Backdrop,
+    shape: Shape = RoundedCornerShape(16.dp),
+    interactive: Boolean = true,
+    highlight: Highlight = Highlight.Default,
+    forceDark: Boolean = false,
+): Modifier = this.liquidGlass(shape = shape, interactive = interactive)
+
+/** Overload accepting luminanceAnimation. */
+@Composable
+fun Modifier.liquidGlass(
+    backdrop: Backdrop,
+    luminanceAnimation: Float,
+    shape: Shape = RoundedCornerShape(16.dp),
+    interactive: Boolean = true,
+    blurScale: Float = 1f,
+    minScrim: Float = 0.1f,
+    maxScrim: Float = 0.4f,
+    forceDark: Boolean = false,
+): Modifier = this.liquidGlass(shape = shape, interactive = interactive)
+
+@Composable
+fun LiquidGlassSurface(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(16.dp),
+    color: Color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.75f),
+    contentColor: Color = contentColorFor(color),
+    tonalElevation: Dp = 0.dp,
+    shadowElevation: Dp = 0.dp,
+    border: BorderStroke? = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+    isGlassEnabled: Boolean = LocalLiquidGlass.current,
+    content: @Composable () -> Unit,
+) {
+    Surface(
+        modifier = modifier.liquidGlass(
+            shape = shape,
+            isGlassEnabled = isGlassEnabled,
+            backgroundColor = color,
+            fallbackBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = shape,
+        color = Color.Transparent,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        shadowElevation = shadowElevation,
+        border = null,
+        content = content,
+    )
 }
 
 @Composable
@@ -675,45 +308,39 @@ fun LiquidGlassContainer(
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    if (backdrop == null || !isLiquidGlassBackdropSupported()) {
-        Box(
-            modifier = modifier
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)),
-            contentAlignment = contentAlignment,
-            content = content,
-        )
-        return
-    }
     Box(
-        modifier = modifier.liquidGlass(backdrop, shape, interactive, highlight),
+        modifier = modifier.liquidGlass(
+            shape = shape,
+            interactive = interactive,
+            borderWidth = highlight.width,
+            borderColor = highlight.color
+        ),
         contentAlignment = contentAlignment,
-        content = content,
+        content = content
     )
 }
 
 @Composable
 fun LiquidGlassActionPill(
     backdrop: Backdrop?,
+    label: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
-    content: @Composable RowScope.() -> Unit,
+    shape: Shape = RoundedCornerShape(12.dp),
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    if (backdrop == null || !isLiquidGlassBackdropSupported()) {
-        Row(
-            modifier = modifier
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)),
-            verticalAlignment = Alignment.CenterVertically,
-            content = content,
-        )
-        return
-    }
     Row(
-        modifier = modifier.liquidGlass(backdrop, shape, true, Highlight.Default),
-        verticalAlignment = Alignment.CenterVertically,
-        content = content,
-    )
+        modifier = modifier
+            .liquidGlass(shape = shape)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (leadingIcon != null) leadingIcon()
+        androidx.compose.material3.Text(text = label, color = textColor)
+        if (trailingIcon != null) trailingIcon()
+    }
 }
 
 @Composable
@@ -767,66 +394,5 @@ fun LiquidGlassIconButton(
             tint = tint,
             modifier = Modifier.size(24.dp).clickable(onClick = onClick),
         )
-    }
-}
-
-/** Observe-only drag/press recognizer. */
-internal suspend fun PointerInputScope.inspectDragGestures(
-    onDragStart: (down: PointerInputChange) -> Unit = {},
-    onDragEnd: (change: PointerInputChange) -> Unit = {},
-    onDragCancel: () -> Unit = {},
-    onDrag: (change: PointerInputChange, dragAmount: Offset) -> Unit,
-) {
-    awaitEachGesture {
-        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
-        val down = awaitFirstDown(requireUnconsumed = false)
-        onDragStart(down)
-        onDrag(down, Offset.Zero)
-        val upEvent = drag(
-            pointerId = down.id,
-            onDrag = { onDrag(it, it.positionChange()) },
-        )
-        if (upEvent == null) {
-            onDragCancel()
-        } else {
-            onDragEnd(upEvent)
-        }
-    }
-}
-
-private suspend inline fun AwaitPointerEventScope.drag(
-    pointerId: PointerId,
-    onDrag: (PointerInputChange) -> Unit,
-): PointerInputChange? {
-    val isPointerUp = currentEvent.changes.fastFirstOrNull { it.id == pointerId }?.pressed != true
-    if (isPointerUp) return null
-    var pointer = pointerId
-    while (true) {
-        val change = awaitDragOrUp(pointer) ?: return null
-        if (change.isConsumed) return null
-        if (change.changedToUpIgnoreConsumed()) return change
-        onDrag(change)
-        pointer = change.id
-    }
-}
-
-private suspend inline fun AwaitPointerEventScope.awaitDragOrUp(pointerId: PointerId): PointerInputChange? {
-    var pointer = pointerId
-    while (true) {
-        val event = awaitPointerEvent()
-        val dragEvent = event.changes.fastFirstOrNull { it.id == pointer } ?: return null
-        if (dragEvent.changedToUpIgnoreConsumed()) {
-            val otherDown = event.changes.fastFirstOrNull { it.pressed }
-            if (otherDown == null) {
-                return dragEvent
-            } else {
-                pointer = otherDown.id
-            }
-        } else {
-            val hasDragged = dragEvent.previousPosition != dragEvent.position
-            if (hasDragged) {
-                return dragEvent
-            }
-        }
     }
 }

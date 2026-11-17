@@ -39,11 +39,21 @@
 -keep class coil.** { *; }
 -dontwarn coil.**
 
-# Pulse Domain & State Models
+# Pulse / BPlayer Domain & State Models
 -keep class com.pulse.player.domain.model.** { *; }
 -keep class com.pulse.player.service.model.** { *; }
 -keep class com.pulse.player.data.remote.** { *; }
 -keep class com.pulse.player.data.local.entity.** { *; }
+-keep class com.pulse.player.data.autoeq.** { *; }
+-keep class com.pulse.player.data.scrobbler.** { *; }
+-keep class com.pulse.player.domain.model.backup.** { *; }
+-keep class com.lastwave.** { *; }
+-keep class com.decent.usbaudio.** { *; }
+
+# JNI & Native methods
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}

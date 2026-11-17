@@ -1,14 +1,3 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://storage.googleapis.com/r8-releases/raw") }
-    }
-    dependencies {
-        classpath("com.android.tools:r8:9.4.14")
-    }
-}
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
