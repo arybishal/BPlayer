@@ -1,0 +1,33 @@
+R_DEF: Internal format may change without notice
+local
+string action_album_art
+string action_equalizer
+string action_favorite
+string action_lyrics
+string action_more
+string action_next
+string action_pause
+string action_play
+string action_previous
+string action_queue
+string action_repeat
+string action_search
+string action_shuffle
+string action_sleep_timer
+string app_name
+string btn_clear_logs
+string btn_copy_logs
+string btn_share_logs
+string desc_error_logs
+string nav_home
+string nav_library
+string nav_search
+string nav_settings
+string tab_albums
+string tab_artists
+string tab_folders
+string tab_genres
+string tab_playlists
+string tab_tracks
+string title_error_logs
+style Theme.Pulse

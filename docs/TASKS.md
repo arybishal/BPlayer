@@ -5,17 +5,17 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 0: Foundations & Architecture Skeleton (M0)
-- [ ] Initialize Android project structure (Gradle Version Catalog `libs.versions.toml`, Min SDK 26, Target SDK 34/35).
-- [ ] Configure Hilt dependency injection, Coroutines, and AndroidX Lifecycle.
-- [ ] Implement foundational Design System in `ui/theme`:
-  - [ ] Color tokens (Light, Dark, AMOLED Black) with strict **No Blue Gradients** rule.
-  - [ ] Typography scale (Plus Jakarta Sans) with dynamic font-scale multiplier ($S$).
-  - [ ] Elevation, corner radii (8/12/20/28/full), and spacing grid (4dp).
-  - [ ] Liquid Glass modifier with `RenderEffect` (API 31+) and graceful fallback (API 26–30).
-- [ ] Configure Material Symbols Rounded iconography.
-- [ ] Build navigation scaffold (Home, Library, Search, Settings) with bottom bar.
-- [ ] Implement `AppLogger` utility and Room-backed `error_logs` table with an uncaught exception handler.
-- [ ] Build basic **Settings > Error Logs** viewer (list, severity badge, copy/share/clear).
+- [x] Initialize Android project structure (Gradle Version Catalog `libs.versions.toml`, Min SDK 26, Target SDK 34/35).
+- [x] Configure Hilt dependency injection, Coroutines, and AndroidX Lifecycle.
+- [x] Implement foundational Design System in `ui/theme`:
+  - [x] Color tokens (Light, Dark, AMOLED Black) with strict **No Blue Gradients** rule.
+  - [x] Typography scale (Plus Jakarta Sans) with dynamic font-scale multiplier ($S$).
+  - [x] Elevation, corner radii (8/12/20/28/full), and spacing grid (4dp).
+  - [x] Liquid Glass modifier with `RenderEffect` (API 31+) and graceful fallback (API 26–30).
+- [x] Configure Material Symbols Rounded iconography.
+- [x] Build navigation scaffold (Home, Library, Search, Settings) with bottom bar.
+- [x] Implement `AppLogger` utility and Room-backed `error_logs` table with an uncaught exception handler.
+- [x] Build basic **Settings > Error Logs** viewer (list, severity badge, copy/share/clear).
 
 ---
 
