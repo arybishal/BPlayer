@@ -58,6 +58,7 @@ import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material3.OutlinedTextField
 import com.pulse.player.domain.model.Playlist
 import com.pulse.player.domain.model.Track
+import com.pulse.player.domain.model.formatInfo
 import com.pulse.player.ui.tageditor.TagEditorSheet
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
@@ -139,13 +140,27 @@ fun SongActionsSheet(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = "${track.artist} • ${track.album}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = extendedColors.onSurfaceMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${track.artist} • ${track.album}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = extendedColors.onSurfaceMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        val info = track.formatInfo
+                        if (info.badgeText != "AUDIO") {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            AudioFormatBadge(
+                                badgeText = info.badgeText,
+                                isHiRes = info.isHiRes,
+                                isDsd = info.isDsd,
+                                isCompact = true
+                            )
+                        }
+                    }
                 }
             }
 
@@ -394,18 +409,22 @@ private fun TechnicalDetailsDialog(
     val extendedColors = LocalExtendedColors.current
     val file = File(track.path)
     val sizeMb = "%.2f MB".format(track.size.toFloat() / (1024 * 1024))
+    val info = track.formatInfo
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Track Details") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                DetailRow("Format", track.formatBadge)
+                DetailRow("Format & Quality", info.detailedBadgeText)
+                if (info.isDsd && info.dsdDecimationRate != null) {
+                    DetailRow("DSD Processing", info.dsdDecimationRate)
+                }
                 DetailRow("MIME Type", track.mimeType)
                 DetailRow("Duration", track.formattedDuration)
                 DetailRow("File Size", sizeMb)
-                DetailRow("Sample Rate", "${track.sampleRate} Hz")
-                DetailRow("Bit Depth", "${track.bitDepth}-bit")
+                DetailRow("Sample Rate", "${info.sampleRateHz} Hz")
+                DetailRow("Bit Depth", "${info.bitDepth}-bit")
                 DetailRow("Path", track.path)
             }
         },

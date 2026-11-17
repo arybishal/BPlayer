@@ -67,10 +67,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.compose.foundation.layout.width
+import com.pulse.player.domain.model.formatInfo
 import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
 import com.pulse.player.service.model.RepeatState
 import com.pulse.player.service.sleeptimer.SleepTimerManager
+import com.pulse.player.ui.components.AudioFormatBadge
 import com.pulse.player.ui.components.HeroSeekBar
 import com.pulse.player.ui.equalizer.EqualizerSheet
 import com.pulse.player.ui.sleeptimer.SleepTimerDialog
@@ -499,5 +502,29 @@ private fun PlayerHeroView(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )
+
+        val info = track.formatInfo
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            AudioFormatBadge(
+                badgeText = info.badgeText,
+                isHiRes = info.isHiRes,
+                isDsd = info.isDsd
+            )
+            val subText = when {
+                info.isDsd -> info.dsdDecimationRate ?: "DSD 1-bit"
+                info.detailedBadgeText.contains("•") -> info.detailedBadgeText.substringAfter("•").trim()
+                else -> "${info.sampleRateHz} Hz"
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = subText,
+                style = MaterialTheme.typography.labelMedium,
+                color = extendedColors.onSurfaceSubtle
+            )
+        }
     }
 }

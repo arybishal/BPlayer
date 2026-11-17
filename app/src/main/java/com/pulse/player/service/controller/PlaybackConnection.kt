@@ -11,6 +11,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.pulse.player.domain.model.AudioFormatInspector
 import com.pulse.player.domain.model.Track
 import com.pulse.player.service.PlaybackService
 import com.pulse.player.service.model.PlaybackState
@@ -95,6 +96,9 @@ class PlaybackConnection @Inject constructor(
     }
 
     fun playTrack(track: Track, newQueue: List<Track> = listOf(track)) {
+        if (!AudioFormatInspector.isFormatSupported(track.path)) {
+            AppLogger.w(tag, "Audio format might be unsupported: ${track.path}")
+        }
         val controller = mediaController ?: return
 
         currentQueue.clear()
@@ -271,6 +275,18 @@ class PlaybackConnection @Inject constructor(
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             mediaController?.let(::updatePlaybackState)
+        }
+
+        override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+            val userMsg = when (error.errorCode) {
+                androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FAILED,
+                androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED ->
+                    "Audio decoding unsupported or failed for current track"
+                androidx.media3.common.PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND ->
+                    "Audio file not found on storage"
+                else -> "ExoPlayer playback error: ${error.errorCodeName}"
+            }
+            AppLogger.e(tag, userMsg, error)
         }
 
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {

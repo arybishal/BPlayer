@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.pulse.player.domain.model.Track
+import com.pulse.player.domain.model.formatInfo
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
 
@@ -105,20 +106,15 @@ fun TrackItemRow(
                     modifier = Modifier.weight(1f, fill = false)
                 )
 
-                if (track.formatBadge != "AUDIO") {
+                val info = track.formatInfo
+                if (info.badgeText != "AUDIO") {
                     Spacer(modifier = Modifier.width(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(horizontal = 5.dp, vertical = 1.dp)
-                    ) {
-                        Text(
-                            text = track.formatBadge,
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    AudioFormatBadge(
+                        badgeText = info.badgeText,
+                        isHiRes = info.isHiRes,
+                        isDsd = info.isDsd,
+                        isCompact = true
+                    )
                 }
             }
         }

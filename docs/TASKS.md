@@ -142,11 +142,11 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## 9. Milestone 9: Extended Audio Formats & FFmpeg (M9)
-- [ ] Evaluate Media3 FFmpeg decoder extension and configure build scripts for audio codecs:
-  - [ ] Enable decoders: APE, WavPack, TTA, MPC, ALAC, WMA, AIFF, DSD.
-- [ ] Implement real-time DSD to 24-bit/88.2kHz PCM software decimation.
-- [ ] Implement format capability check and friendly unsupported error messaging.
-- [ ] Add format badge rendering (`FLAC`, `HI-RES`, `DSD`, `LOSSLESS`) across UI.
+- [x] Evaluate Media3 FFmpeg decoder extension and configure build scripts for audio codecs:
+  - [x] Enable decoders: APE, WavPack, TTA, MPC, ALAC, WMA, AIFF, DSD.
+- [x] Implement real-time DSD to 24-bit/88.2kHz PCM software decimation.
+- [x] Implement format capability check and friendly unsupported error messaging.
+- [x] Add format badge rendering (`FLAC`, `HI-RES`, `DSD`, `LOSSLESS`) across UI.
 
 ---
 
