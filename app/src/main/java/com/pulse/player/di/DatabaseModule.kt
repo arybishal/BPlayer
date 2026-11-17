@@ -3,7 +3,13 @@ package com.pulse.player.di
 import android.content.Context
 import androidx.room.Room
 import com.pulse.player.data.local.db.PulseDatabase
+import com.pulse.player.data.local.db.dao.AlbumDao
+import com.pulse.player.data.local.db.dao.ArtistDao
 import com.pulse.player.data.local.db.dao.ErrorLogDao
+import com.pulse.player.data.local.db.dao.GenreDao
+import com.pulse.player.data.local.db.dao.PlaylistDao
+import com.pulse.player.data.local.db.dao.QueueDao
+import com.pulse.player.data.local.db.dao.TrackDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,7 +36,23 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideErrorLogDao(database: PulseDatabase): ErrorLogDao {
-        return database.errorLogDao()
-    }
+    fun provideTrackDao(database: PulseDatabase): TrackDao = database.trackDao()
+
+    @Provides
+    fun provideAlbumDao(database: PulseDatabase): AlbumDao = database.albumDao()
+
+    @Provides
+    fun provideArtistDao(database: PulseDatabase): ArtistDao = database.artistDao()
+
+    @Provides
+    fun provideGenreDao(database: PulseDatabase): GenreDao = database.genreDao()
+
+    @Provides
+    fun providePlaylistDao(database: PulseDatabase): PlaylistDao = database.playlistDao()
+
+    @Provides
+    fun provideQueueDao(database: PulseDatabase): QueueDao = database.queueDao()
+
+    @Provides
+    fun provideErrorLogDao(database: PulseDatabase): ErrorLogDao = database.errorLogDao()
 }

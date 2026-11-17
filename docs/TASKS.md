@@ -20,18 +20,18 @@ This tracker serves as the authoritative milestone checklist for the development
 ---
 
 ## Milestone 1: Library Indexing & Browsing (M1)
-- [ ] Build Just-In-Time media permission request flow (`READ_MEDIA_AUDIO` / `READ_EXTERNAL_STORAGE`).
-- [ ] Implement Room database schema (`TRACK`, `ALBUM`, `ARTIST`, `PLAYLIST`, `QUEUE_ITEM`).
-- [ ] Build high-performance `MediaStore` audio scanner with incremental diffing and pull-to-refresh.
-- [ ] Build Library screen with 6 tabs:
-  - [ ] Tracks list (thumbnail, title, artist, duration, format badge).
-  - [ ] Albums list/grid toggle.
-  - [ ] Artists list/grid toggle.
-  - [ ] Genres list.
-  - [ ] Folders physical file tree browser.
-  - [ ] Playlists tab.
-- [ ] Implement sorting engine (Title, Artist, Album, Date Added, Duration, Play Count).
-- [ ] Implement fast-scroll alphabet index scrubber with popup bubble.
+- [x] Build Just-In-Time media permission request flow (`READ_MEDIA_AUDIO` / `READ_EXTERNAL_STORAGE`).
+- [x] Implement Room database schema (`TRACK`, `ALBUM`, `ARTIST`, `PLAYLIST`, `QUEUE_ITEM`).
+- [x] Build high-performance `MediaStore` audio scanner with incremental diffing and pull-to-refresh.
+- [x] Build Library screen with 6 tabs:
+  - [x] Tracks list (thumbnail, title, artist, duration, format badge).
+  - [x] Albums list/grid toggle.
+  - [x] Artists list/grid toggle.
+  - [x] Genres list.
+  - [x] Folders physical file tree browser.
+  - [x] Playlists tab.
+- [x] Implement sorting engine (Title, Artist, Album, Date Added, Duration, Play Count).
+- [x] Implement fast-scroll alphabet index scrubber with popup bubble.
 
 ---
 
