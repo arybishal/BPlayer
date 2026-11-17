@@ -83,6 +83,18 @@ interface PlaylistDao {
 
     @Query("UPDATE playlists SET trackCount = :count, updatedAt = :updatedAt WHERE id = :playlistId")
     suspend fun updatePlaylistTrackCount(playlistId: Long, count: Int, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM playlists ORDER BY name COLLATE NOCASE ASC")
+    suspend fun getAllPlaylistsSync(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM playlist_tracks WHERE playlistId = :playlistId ORDER BY orderIndex ASC")
+    suspend fun getPlaylistTracksSync(playlistId: Long): List<PlaylistTrackEntity>
+
+    @Query("DELETE FROM playlists")
+    suspend fun clearPlaylists()
+
+    @Query("DELETE FROM playlist_tracks")
+    suspend fun clearPlaylistTracks()
 }
 
 @Dao
@@ -92,6 +104,9 @@ interface QueueDao {
 
     @Query("SELECT * FROM queue_items ORDER BY queuePosition ASC")
     fun getPersistedQueue(): Flow<List<QueueItemEntity>>
+
+    @Query("SELECT * FROM queue_items ORDER BY queuePosition ASC")
+    suspend fun getPersistedQueueSync(): List<QueueItemEntity>
 
     @Query("DELETE FROM queue_items")
     suspend fun clearQueue()

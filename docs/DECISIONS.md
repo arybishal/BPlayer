@@ -155,3 +155,29 @@ Pulse adheres strictly to interface segregation and pure Kotlin test doubles (fa
 ### Consequences & Tradeoffs
 - **Positive**: Blazing fast unit test execution (< 15 seconds), zero classpath reflection panics, and 100% adherence to AGENTS.md dependency minimalism rules.
 
+---
+
+## ADR 011: Modern UI Components & Elimination of Oval / Bubble Artifacts
+
+### Context
+Previous iterations of settings dialogs and choice pickers employed pill/oval shaped clipping masks (`CircleShape` on rectangular containers) that produced distorted elliptical bubbles.
+
+### Decision
+1. Eliminate all elliptical/oval clipping masks across settings menus, sheets, and dialogs.
+2. Adopt sleek Material 3 `ModalBottomSheet` containers (`RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)`) with interactive item cards using uniform `RoundedCornerShape(14.dp)` and subtle border strokes.
+3. Replace all remaining circular containers (except the Hero Play/Pause button and artist avatars) with sleek rounded cards (`RoundedCornerShape(12.dp)` - `22.dp`).
+
+---
+
+## ADR 012: BPlayer Evolution & LastWave-Native Feature Integration
+
+### Context
+Transforming the audio player into BPlayer required integrating high-end audio features from LastWave-Native while respecting licensing (GPL v3 attribution) and architectural boundaries.
+
+### Decision
+1. **AutoEQ Headphone Correction Engine**: Integrated 4,000+ headphone lab calibration curves with Levenberg-Marquardt biquad filter solver and parametric EQ publishing.
+2. **Signal Path Audit**: Poweramp-style inspection modal auditing Source Stream (format, sample rate, bit depth), Float32 DSP Engine, and Android HAL / AudioTrack output.
+3. **Last.fm Scrobbler**: Authenticated MD5 scrobbler with offline disk queuing, rate-limit backoff, and 50%/240s scrobble triggers.
+4. **Android Auto**: Upgraded `PlaybackService` to `MediaLibraryService` with reactive `MediaLibrarySession` browse tree.
+
+

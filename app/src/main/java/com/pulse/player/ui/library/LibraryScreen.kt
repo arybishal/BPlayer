@@ -53,6 +53,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.pulse.player.ui.common.ExpressiveHeader
+import com.pulse.player.ui.common.HeaderActionIcon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -133,82 +136,42 @@ fun LibraryScreen(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
     ) {
-        // Top Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Library",
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        ExpressiveHeader(
+            title = "Library",
+            subtitle = "${state.tracks.size} tracks • ${state.albums.size} albums",
+            actions = {
                 // Song Recognition ("What's this song?")
-                IconButton(
-                    onClick = { showRecognitionSheet = true },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Hearing,
-                        contentDescription = "Identify Song",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
+                HeaderActionIcon(
+                    icon = Icons.Rounded.Hearing,
+                    contentDescription = "Identify Song",
+                    onClick = { showRecognitionSheet = true }
+                )
 
                 // Refresh / Scan
-                IconButton(
-                    onClick = { viewModel.triggerLibraryScan() },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    if (state.isScanning) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Refresh,
-                            contentDescription = "Rescan Library",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
+                HeaderActionIcon(
+                    icon = Icons.Rounded.Refresh,
+                    contentDescription = "Rescan Library",
+                    onClick = { viewModel.triggerLibraryScan() }
+                )
 
                 // Grid / List toggle (for Albums/Artists)
                 if (state.selectedTab == 1 || state.selectedTab == 2) {
-                    IconButton(
-                        onClick = { viewModel.toggleGridView() },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (state.isGridView) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView,
-                            contentDescription = "Toggle Grid/List View",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+                    HeaderActionIcon(
+                        icon = if (state.isGridView) Icons.AutoMirrored.Rounded.ViewList else Icons.Rounded.GridView,
+                        contentDescription = "Toggle Grid/List View",
+                        onClick = { viewModel.toggleGridView() }
+                    )
                 }
 
                 // Sort Button (for Tracks)
                 if (state.selectedTab == 0) {
                     Box {
-                        IconButton(
-                            onClick = { showSortMenu = true },
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.Sort,
-                                contentDescription = "Sort Tracks",
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
+                        HeaderActionIcon(
+                            icon = Icons.AutoMirrored.Rounded.Sort,
+                            contentDescription = "Sort Tracks",
+                            onClick = { showSortMenu = true }
+                        )
 
                         DropdownMenu(
                             expanded = showSortMenu,
@@ -267,20 +230,24 @@ fun LibraryScreen(
                     }
                 }
             }
-        }
+        )
 
         // Tab Row
         ScrollableTabRow(
             selectedTabIndex = state.selectedTab,
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.primary,
             edgePadding = 20.dp,
             indicator = { tabPositions ->
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[state.selectedTab]),
-                    color = MaterialTheme.colorScheme.primary,
-                    height = 3.dp
-                )
+                if (state.selectedTab < tabPositions.size) {
+                    Box(
+                        Modifier
+                            .tabIndicatorOffset(tabPositions[state.selectedTab])
+                            .height(3.dp)
+                            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
             },
             divider = {}
         ) {
@@ -329,7 +296,7 @@ fun LibraryScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         LazyColumn(
                             state = trackListState,
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            contentPadding = PaddingValues(start = 12.dp, top = 6.dp, end = 12.dp, bottom = 88.dp),
                             modifier = Modifier.fillMaxSize().padding(end = 20.dp)
                         ) {
                             items(state.tracks, key = { it.id }) { track ->
@@ -371,7 +338,7 @@ fun LibraryScreen(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(if (state.isGridView) 2 else 1),
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 88.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(state.albums, key = { it.id }) { album ->
@@ -387,7 +354,7 @@ fun LibraryScreen(
                 } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(if (state.isGridView) 2 else 1),
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 88.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(state.artists, key = { it.id }) { artist ->
@@ -444,7 +411,7 @@ fun LibraryScreen(
                         EmptyLibraryView(message = "No custom playlists created yet.")
                     } else {
                         LazyColumn(
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            contentPadding = PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 88.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(state.playlists, key = { it.id }) { playlist ->
@@ -464,7 +431,7 @@ fun LibraryScreen(
                     EmptyLibraryView(message = "No audio folders detected.")
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 88.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(state.folders, key = { it.path }) { folder ->
@@ -515,7 +482,9 @@ fun LibraryScreen(
                 ) {
                     Text("Cancel")
                 }
-            }
+            },
+            shape = RoundedCornerShape(22.dp),
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 

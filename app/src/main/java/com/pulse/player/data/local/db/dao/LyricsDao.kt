@@ -12,6 +12,12 @@ interface LyricsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLyrics(lyrics: LyricsEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLyricsList(lyrics: List<LyricsEntity>)
+
+    @Query("SELECT * FROM lyrics_cache")
+    suspend fun getAllLyrics(): List<LyricsEntity>
+
     @Query("SELECT * FROM lyrics_cache WHERE trackId = :trackId LIMIT 1")
     fun observeLyricsForTrack(trackId: String): Flow<LyricsEntity?>
 

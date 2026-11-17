@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,14 +32,18 @@ import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.GraphicEq
+import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.VerifiedUser
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -76,13 +82,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.equalizer.EqualizerSheet
+import com.pulse.player.ui.equalizer.autoeq.AutoEqDialog
 import com.pulse.player.ui.sleeptimer.SleepTimerDialog
+import com.pulse.player.ui.settings.backup.BackupExportSheet
+import com.pulse.player.ui.settings.backup.BackupRestoreViewModel
+import com.pulse.player.ui.settings.backup.BackupSuccessDialog
+import com.pulse.player.ui.settings.backup.PasswordPromptDialog
+import com.pulse.player.ui.settings.backup.RestoreInspectionSheet
+import com.pulse.player.ui.settings.backup.RestoreResultDialog
+import com.pulse.player.ui.settings.scrobbler.LastFmScrobblerDialog
 import com.pulse.player.ui.theme.AccentAmber
 import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.AccentCoral
 import com.pulse.player.ui.theme.AccentEmerald
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.ThemeMode
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -90,19 +107,42 @@ fun SettingsScreen(
     audioEffectsController: AudioEffectsController? = null,
     sleepTimerManager: SleepTimerManager? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
+    backupViewModel: BackupRestoreViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
+    val backupState by backupViewModel.uiState.collectAsState()
     val extendedColors = LocalExtendedColors.current
     val context = LocalContext.current
+
+    var showExportSheet by remember { mutableStateOf(false) }
+    var pendingExportPassword by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        if (uri != null) {
+            backupViewModel.exportToUri(uri, pendingExportPassword)
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            backupViewModel.onFileSelectedForRestore(uri)
+        }
+    }
 
     var showThemeSheet by remember { mutableStateOf(false) }
     var showAccentSheet by remember { mutableStateOf(false) }
     var showFontSheet by remember { mutableStateOf(false) }
     var showBatterySheet by remember { mutableStateOf(false) }
     var showApiKeysSheet by remember { mutableStateOf(false) }
+    var showLastFmDialog by remember { mutableStateOf(false) }
     var showAboutSheet by remember { mutableStateOf(false) }
     var showEqualizerSheet by remember { mutableStateOf(false) }
+    var showAutoEqDialog by remember { mutableStateOf(false) }
     var showSleepTimerDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -194,6 +234,15 @@ fun SettingsScreen(
             SettingsCardDivider()
 
             SettingsActionRow(
+                icon = Icons.Rounded.Headphones,
+                title = "AutoEQ Headphone Correction",
+                subtitle = "Over 4,000 lab measurements, target curves & parametric EQ",
+                onClick = { showAutoEqDialog = true }
+            )
+
+            SettingsCardDivider()
+
+            SettingsActionRow(
                 icon = Icons.Rounded.Bedtime,
                 title = "Sleep Timer",
                 subtitle = "Presets & 10s smooth volume fade-out",
@@ -245,11 +294,68 @@ fun SettingsScreen(
                 subtitle = "Gemini AI (Lyrics) & AudD (Song Identification)",
                 onClick = { showApiKeysSheet = true }
             )
+
+            SettingsCardDivider()
+
+            SettingsActionRow(
+                icon = Icons.Rounded.CloudUpload,
+                title = "Last.fm Scrobbler",
+                subtitle = if (state.lastFmUsername.isNotBlank()) "Connected as ${state.lastFmUsername}" else "Sync playback history and scrobble offline tracks",
+                onClick = { showLastFmDialog = true },
+                trailingContent = {
+                    if (state.lastFmUsername.isNotBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(extendedColors.statusSuccess.copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "Connected",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = extendedColors.statusSuccess
+                            )
+                        }
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(22.dp))
 
-        // SECTION 5: Diagnostics & About
+        // SECTION 5: Backup & Restore
+        SettingsSectionHeader(title = "Backup & Personal Data")
+
+        SettingsCard {
+            val lastTime = backupState.lastBackupTimestamp
+            val formattedLastTime = remember(lastTime) {
+                if (lastTime != null && lastTime > 0) {
+                    SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(lastTime))
+                } else null
+            }
+
+            SettingsActionRow(
+                icon = Icons.Rounded.CloudUpload,
+                title = "Export Backup",
+                subtitle = if (formattedLastTime != null) "Last backup: $formattedLastTime" else "Package settings, playlists, favorites & encrypted API keys",
+                onClick = { showExportSheet = true }
+            )
+
+            SettingsCardDivider()
+
+            SettingsActionRow(
+                icon = Icons.Rounded.CloudDownload,
+                title = "Restore from Backup",
+                subtitle = "Restore app state and personal music collections",
+                onClick = {
+                    importLauncher.launch(arrayOf("application/octet-stream", "application/zip", "*/*"))
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        // SECTION 6: Diagnostics & About
         SettingsSectionHeader(title = "Diagnostics & Info")
 
         SettingsCard {
@@ -343,6 +449,15 @@ fun SettingsScreen(
         )
     }
 
+    // LAST.FM SCROBBLER DIALOG
+    if (showLastFmDialog) {
+        LastFmScrobblerDialog(
+            preferencesManager = viewModel.preferencesManager,
+            scrobbleRepository = viewModel.scrobbleRepository,
+            onDismiss = { showLastFmDialog = false }
+        )
+    }
+
     // ABOUT SHEET
     if (showAboutSheet) {
         AboutPulseSheet(
@@ -358,11 +473,109 @@ fun SettingsScreen(
         )
     }
 
+    // AUTOEQ DIALOG
+    if (showAutoEqDialog) {
+        AutoEqDialog(
+            onDismiss = { showAutoEqDialog = false },
+            onOpenGraphicEq = {
+                showAutoEqDialog = false
+                showEqualizerSheet = true
+            }
+        )
+    }
+
     // SLEEP TIMER DIALOG
     if (showSleepTimerDialog && sleepTimerManager != null) {
         SleepTimerDialog(
             sleepTimerManager = sleepTimerManager,
             onDismiss = { showSleepTimerDialog = false }
+        )
+    }
+
+    // BACKUP EXPORT SHEET
+    if (showExportSheet) {
+        BackupExportSheet(
+            isExporting = backupState.isExporting,
+            onDismiss = { showExportSheet = false },
+            onConfirmExport = { pwd ->
+                pendingExportPassword = pwd
+                showExportSheet = false
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())
+                exportLauncher.launch("pulse_backup_$timestamp.pulsebackup")
+            }
+        )
+    }
+
+    // BACKUP SUCCESS DIALOG
+    backupState.exportSuccessManifest?.let { manifest ->
+        BackupSuccessDialog(
+            manifest = manifest,
+            onDismiss = { backupViewModel.dismissExportDialog() }
+        )
+    }
+
+    // BACKUP EXPORT ERROR DIALOG
+    backupState.exportError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { backupViewModel.dismissExportDialog() },
+            title = { Text("Backup Failed") },
+            text = { Text(err) },
+            confirmButton = {
+                Button(onClick = { backupViewModel.dismissExportDialog() }) {
+                    Text("OK")
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = extendedColors.surfaceCard
+        )
+    }
+
+    // RESTORE PASSWORD PROMPT
+    if (backupState.requiresPasswordPrompt) {
+        PasswordPromptDialog(
+            errorMessage = backupState.inspectionError,
+            onDismiss = { backupViewModel.dismissInspectionSheet() },
+            onSubmitPassword = { pwd ->
+                backupState.selectedImportUri?.let { uri ->
+                    backupViewModel.inspectBackup(uri, pwd)
+                }
+            }
+        )
+    }
+
+    // RESTORE INSPECTION SUMMARY SHEET
+    backupState.restoreSummary?.let { summary ->
+        RestoreInspectionSheet(
+            summary = summary,
+            isRestoring = backupState.isRestoring,
+            onDismiss = { backupViewModel.dismissInspectionSheet() },
+            onConfirmRestore = {
+                backupViewModel.confirmRestore()
+            }
+        )
+    }
+
+    // RESTORE RESULT DIALOG
+    backupState.restoreResult?.let { res ->
+        RestoreResultDialog(
+            result = res,
+            onDismiss = { backupViewModel.dismissRestoreResultDialog() }
+        )
+    }
+
+    // RESTORE ERROR DIALOG
+    backupState.restoreError?.let { err ->
+        AlertDialog(
+            onDismissRequest = { backupViewModel.dismissRestoreResultDialog() },
+            title = { Text("Restoration Failed") },
+            text = { Text(err) },
+            confirmButton = {
+                Button(onClick = { backupViewModel.dismissRestoreResultDialog() }) {
+                    Text("OK")
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = extendedColors.surfaceCard
         )
     }
 }
@@ -1223,7 +1436,7 @@ private fun AboutPulseSheet(
                 Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
-                        text = "Pulse Music Player",
+                        text = "BPlayer",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -1239,7 +1452,7 @@ private fun AboutPulseSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Pulse is an exquisite, offline, content-first audio player engineered with Jetpack Compose and AndroidX Media3.",
+                text = "BPlayer is an exquisite, offline, content-first audio player engineered with Jetpack Compose, AndroidX Media3, and LastWave-Native DSP architecture.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )

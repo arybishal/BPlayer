@@ -46,7 +46,7 @@ fun PermissionRationaleCard(
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(18.dp))
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
@@ -70,7 +70,7 @@ fun PermissionRationaleCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Pulse plays your local audio files directly from your device storage. Grant media permission to scan tracks, albums, and playlists.",
+                text = "BPlayer plays your local audio files directly from your device storage. Grant media permission to scan tracks, albums, and playlists.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = extendedColors.onSurfaceMuted,
                 textAlign = TextAlign.Center

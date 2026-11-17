@@ -90,6 +90,12 @@ interface TrackDao {
 
     @Query("DELETE FROM tracks WHERE path NOT IN (:activePaths)")
     suspend fun deleteOrphanedTracks(activePaths: List<String>)
+
+    @Query("SELECT * FROM tracks")
+    suspend fun getAllTracksSync(): List<TrackEntity>
+
+    @Query("SELECT * FROM tracks WHERE isFavorite = 1")
+    suspend fun getFavoriteTracksSync(): List<TrackEntity>
 }
 
 data class TrackSyncHeader(

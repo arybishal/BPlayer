@@ -4,9 +4,11 @@ import com.pulse.player.data.local.audio.AudioRecorder
 import com.pulse.player.data.local.audio.MicrophoneRecorder
 import com.pulse.player.data.local.datastore.PreferencesManager
 import com.pulse.player.data.local.datastore.RecognitionPreferences
+import com.pulse.player.data.repository.BackupRepositoryImpl
 import com.pulse.player.data.repository.LibraryRepositoryImpl
 import com.pulse.player.data.repository.LyricsRepositoryImpl
 import com.pulse.player.data.repository.SongRecognitionRepositoryImpl
+import com.pulse.player.domain.repository.BackupRepository
 import com.pulse.player.domain.repository.LibraryRepository
 import com.pulse.player.domain.repository.LyricsRepository
 import com.pulse.player.domain.repository.SongRecognitionRepository
@@ -37,6 +39,12 @@ abstract class RepositoryModule {
     abstract fun bindSongRecognitionRepository(
         impl: SongRecognitionRepositoryImpl
     ): SongRecognitionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBackupRepository(
+        impl: BackupRepositoryImpl
+    ): BackupRepository
 
     @Binds
     @Singleton

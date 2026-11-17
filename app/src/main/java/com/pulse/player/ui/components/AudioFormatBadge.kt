@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pulse.player.ui.theme.LocalExtendedColors
@@ -22,7 +23,8 @@ fun AudioFormatBadge(
     modifier: Modifier = Modifier,
     isHiRes: Boolean = false,
     isDsd: Boolean = false,
-    isCompact: Boolean = false
+    isCompact: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     val extendedColors = LocalExtendedColors.current
 
@@ -58,6 +60,7 @@ fun AudioFormatBadge(
                 color = badgeBorder,
                 shape = RoundedCornerShape(if (isCompact) 4.dp else 6.dp)
             )
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(
                 horizontal = if (isCompact) 5.dp else 7.dp,
                 vertical = if (isCompact) 1.dp else 2.5.dp

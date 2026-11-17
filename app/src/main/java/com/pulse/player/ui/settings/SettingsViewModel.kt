@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pulse.player.data.local.datastore.PreferencesManager
 import com.pulse.player.ui.theme.AccentChoice
 import com.pulse.player.ui.theme.ThemeMode
+import com.pulse.player.data.scrobbler.ScrobbleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,8 @@ data class SettingsUiState(
     val isLiquidGlassEnabled: Boolean = true,
     val isBatteryOptimized: Boolean = true,
     val geminiApiKey: String = "",
-    val auddApiKey: String = ""
+    val auddApiKey: String = "",
+    val lastFmUsername: String = ""
 )
 
 private data class ThemeAndStyleData(
@@ -34,10 +36,18 @@ private data class ThemeAndStyleData(
     val glass: Boolean
 )
 
+private data class ApiAndBatteryData(
+    val geminiKey: String,
+    val auddKey: String,
+    val lastFmUser: String,
+    val batteryOpt: Boolean
+)
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesManager: PreferencesManager
+    val preferencesManager: PreferencesManager,
+    val scrobbleRepository: ScrobbleRepository
 ) : ViewModel() {
 
     private val _batteryOptimized = MutableStateFlow(checkBatteryStatus())
@@ -54,23 +64,25 @@ class SettingsViewModel @Inject constructor(
     private val apiAndBatteryFlow = combine(
         preferencesManager.geminiApiKeyFlow,
         preferencesManager.auddApiKeyFlow,
+        preferencesManager.lastFmUsernameFlow,
         _batteryOptimized
-    ) { geminiKey, auddKey, batteryOpt ->
-        Triple(geminiKey, auddKey, batteryOpt)
+    ) { geminiKey, auddKey, lastFmUser, batteryOpt ->
+        ApiAndBatteryData(geminiKey, auddKey, lastFmUser, batteryOpt)
     }
 
     val uiState: StateFlow<SettingsUiState> = combine(
         themeAndFontFlow,
         apiAndBatteryFlow
-    ) { styleData, (geminiKey, auddKey, batteryOpt) ->
+    ) { styleData, apiData ->
         SettingsUiState(
             themeMode = styleData.theme,
             accentChoice = styleData.accent,
             fontScale = styleData.fontScale,
             isLiquidGlassEnabled = styleData.glass,
-            isBatteryOptimized = batteryOpt,
-            geminiApiKey = geminiKey,
-            auddApiKey = auddKey
+            isBatteryOptimized = apiData.batteryOpt,
+            geminiApiKey = apiData.geminiKey,
+            auddApiKey = apiData.auddKey,
+            lastFmUsername = apiData.lastFmUser
         )
     }.stateIn(
         scope = viewModelScope,

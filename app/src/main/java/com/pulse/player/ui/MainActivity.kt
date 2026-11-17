@@ -28,7 +28,7 @@ import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.controller.PlaybackConnection
 import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.components.MiniPlayer
-import com.pulse.player.ui.navigation.PulseBottomBar
+import com.pulse.player.ui.navigation.BPlayerBottomBar
 import com.pulse.player.ui.navigation.PulseNavGraph
 import com.pulse.player.ui.navigation.Screen
 import com.pulse.player.ui.player.NowPlayingScreen
@@ -104,7 +104,7 @@ fun PulseAppContent(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 if (showBottomBar) {
-                    PulseBottomBar(
+                    BPlayerBottomBar(
                         currentRoute = currentRoute,
                         onNavigateToRoute = { route ->
                             navController.navigate(route) {

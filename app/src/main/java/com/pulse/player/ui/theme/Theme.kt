@@ -27,7 +27,11 @@ data class ExtendedColors(
     val outlineVariant: Color,
     val statusDanger: Color,
     val statusSuccess: Color,
-    val isGlassEnabled: Boolean
+    val statusWarning: Color = StatusWarning,
+    val accent: Color = AccentAmber,
+    val surfaceElevated: Color = DarkSurfaceElevated,
+    val surfaceCard: Color = DarkSurface,
+    val isGlassEnabled: Boolean = true
 )
 
 val LocalExtendedColors = staticCompositionLocalOf {
@@ -38,6 +42,10 @@ val LocalExtendedColors = staticCompositionLocalOf {
         outlineVariant = DarkOutlineVariant,
         statusDanger = StatusDanger,
         statusSuccess = StatusSuccess,
+        statusWarning = StatusWarning,
+        accent = AccentAmber,
+        surfaceElevated = DarkSurfaceElevated,
+        surfaceCard = DarkSurface,
         isGlassEnabled = true
     )
 }
@@ -128,12 +136,26 @@ fun PulseTheme(
         outlineVariant = if (isDark || isAmoled) DarkOutlineVariant else LightOutline,
         statusDanger = StatusDanger,
         statusSuccess = StatusSuccess,
+        statusWarning = StatusWarning,
+        accent = primaryAccent,
+        surfaceElevated = when {
+            isAmoled -> AmoledSurfaceElevated
+            isDark -> DarkSurfaceElevated
+            else -> LightSurfaceElevated
+        },
+        surfaceCard = when {
+            isAmoled -> AmoledSurface
+            isDark -> DarkSurface
+            else -> LightSurface
+        },
         isGlassEnabled = isGlassEnabled
     )
 
     CompositionLocalProvider(
         LocalExtendedColors provides extendedColors,
-        LocalFontScale provides fontScale
+        LocalFontScale provides fontScale,
+        LocalIsDarkTheme provides isDark,
+        LocalLiquidGlass provides isGlassEnabled
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -142,4 +164,24 @@ fun PulseTheme(
             content = content
         )
     }
+}
+
+/** BPlayer Theme wrapper matching BPlayer brand identity. */
+@Composable
+fun BPlayerTheme(
+    themeMode: ThemeMode = ThemeMode.DARK,
+    accentChoice: AccentChoice = AccentChoice.WARM_AMBER,
+    fontScale: Float = 1.0f,
+    isGlassEnabled: Boolean = true,
+    dynamicAccentColor: Color? = null,
+    content: @Composable () -> Unit
+) {
+    PulseTheme(
+        themeMode = themeMode,
+        accentChoice = accentChoice,
+        fontScale = fontScale,
+        isGlassEnabled = isGlassEnabled,
+        dynamicAccentColor = dynamicAccentColor,
+        content = content
+    )
 }

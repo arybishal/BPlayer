@@ -166,3 +166,23 @@ This tracker serves as the authoritative milestone checklist for the development
 - [x] Optimize scroll performance and memory footprint with Android Studio Profiler.
 - [x] Configure ProGuard / R8 optimization rules for Media3, JAudioTagger, Retrofit, and Room.
 - [x] Generate Baseline Profiles to optimize cold start time to under 1.5 seconds.
+
+---
+
+## 12. Milestone 12: Encrypted Backup & Restore System (M12)
+- [x] Implement AES-256-GCM authenticated encryption engine with PBKDF2 key derivation.
+- [x] Design versioned backup manifest (`.pulsebackup` / `.zip`) capturing settings, playlists, favorites, custom presets, and encrypted credentials.
+- [x] Build multi-pass track reconciliation engine matching tracks by title, artist, album, duration, and fuzzy distance.
+- [x] Add Storage Access Framework (SAF) file picker integration for export and import.
+- [x] Build Backup & Restore UI: password prompt, restore summary preview, progress indicator, and result dialog.
+
+---
+
+## 13. Milestone 13: BPlayer Evolution & LastWave-Native Integration (M13)
+- [x] Rebrand UI, metadata, and typography across app from Pulse to BPlayer.
+- [x] Eliminate all elliptical/oval bubble dialogs; replace with sleek Material 3 bottom sheets and 14–22dp rounded cards.
+- [x] Integrate AutoEQ Headphone Correction Engine with 4,000+ calibration curves, interactive response canvas, and target curves.
+- [x] Integrate Poweramp-style Signal Path Audit modal (Source Stream, Float32 DSP, AudioTrack output).
+- [x] Integrate Last.fm Scrobbler with MD5 authentication, offline queue persistence, and rate-limit backoff.
+- [x] Upgrade PlaybackService to AndroidX MediaLibraryService for Android Auto support.
+- [x] Integrate Decent USB Audio Driver architecture with 16KB page-aligned native runtime.

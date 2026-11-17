@@ -392,6 +392,8 @@ private fun CandidateArtworkDialog(
             TextButton(onClick = onDismiss) {
                 Text("Close")
             }
-        }
+        },
+        shape = RoundedCornerShape(22.dp),
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }

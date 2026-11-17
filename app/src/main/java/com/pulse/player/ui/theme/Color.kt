@@ -3,6 +3,8 @@ package com.pulse.player.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Accent Palettes (Curated Warm / Organic — STRICTLY NO BLUE GRADIENTS)
+val BPlayerPrimary = Color(0xFFE07A5F)
+val BPlayerSecondary = Color(0xFFF4A261)
 val AccentAmber = Color(0xFFF4A261)
 val AccentAmberDark = Color(0xFFE07A5F)
 val AccentCoral = Color(0xFFFF6B6B)

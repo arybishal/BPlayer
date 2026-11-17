@@ -312,7 +312,9 @@ fun SongActionsSheet(
                 TextButton(onClick = { showDeleteConfirmDialog = false }) {
                     Text(text = "Cancel")
                 }
-            }
+            },
+            shape = RoundedCornerShape(22.dp),
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
@@ -350,7 +352,7 @@ private fun QuickActionButton(
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(14.dp))
                 .background(MaterialTheme.colorScheme.surface),
             contentAlignment = Alignment.Center
         ) {
@@ -432,7 +434,9 @@ private fun TechnicalDetailsDialog(
             TextButton(onClick = onDismiss) {
                 Text(text = "Close")
             }
-        }
+        },
+        shape = RoundedCornerShape(22.dp),
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }
 
@@ -591,6 +595,8 @@ private fun AddToPlaylistDialog(
             ) {
                 Text("Cancel")
             }
-        }
+        },
+        shape = RoundedCornerShape(22.dp),
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }

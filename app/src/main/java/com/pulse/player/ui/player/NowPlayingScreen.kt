@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -76,11 +77,14 @@ import com.pulse.player.service.sleeptimer.SleepTimerManager
 import com.pulse.player.ui.components.AudioFormatBadge
 import com.pulse.player.ui.components.HeroSeekBar
 import com.pulse.player.ui.equalizer.EqualizerSheet
+import com.pulse.player.ui.player.signalpath.SignalPathDialog
 import com.pulse.player.ui.sleeptimer.SleepTimerDialog
 import com.pulse.player.ui.theme.HeroAlbumArtShape
 import com.pulse.player.ui.theme.LocalExtendedColors
 import com.pulse.player.ui.theme.StatusDanger
+import com.pulse.player.ui.theme.liquidGlass
 import com.pulse.player.util.palette.PaletteExtractor
+import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -107,6 +111,7 @@ fun NowPlayingScreen(
     val pagerState = rememberPagerState(pageCount = { 3 })
     var showEqualizer by remember { mutableStateOf(false) }
     var showSleepTimer by remember { mutableStateOf(false) }
+    var showSignalPathDialog by remember { mutableStateOf(false) }
     val sleepTimerState by sleepTimerManager?.state?.collectAsState() ?: remember { mutableStateOf(null) }
 
     var heartScaleTarget by remember { mutableFloatStateOf(1.0f) }
@@ -156,8 +161,9 @@ fun NowPlayingScreen(
                 if (sleepTimerState?.isActive == true) {
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(8.dp))
                             .background(activeAccent.copy(alpha = 0.18f))
+                            .border(0.75.dp, activeAccent.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                             .clickable { showSleepTimer = true }
                             .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
@@ -224,7 +230,11 @@ fun NowPlayingScreen(
                 .fillMaxWidth()
         ) { page ->
             when (page) {
-                0 -> PlayerHeroView(track = track, isPlaying = state.isPlaying)
+                0 -> PlayerHeroView(
+                    track = track,
+                    isPlaying = state.isPlaying,
+                    onBadgeClick = { showSignalPathDialog = true }
+                )
                 1 -> LyricsPage(
                     track = track,
                     currentPositionMs = state.currentPositionMs,
@@ -244,100 +254,112 @@ fun NowPlayingScreen(
             onSeek = { playbackConnection.seekTo(it) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Main Transport Controls Pod (Pure Vector Icons)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // Main Transport Controls Pod in Liquid Glass Capsule (Pure Vector Icons)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlass(
+                    shape = RoundedCornerShape(32.dp),
+                    isGlassEnabled = extendedColors.isGlassEnabled,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                    fallbackBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+                .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
-            // Shuffle Button
-            IconButton(
-                onClick = { playbackConnection.toggleShuffle() },
-                modifier = Modifier.size(48.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Shuffle,
-                    contentDescription = "Toggle Shuffle",
-                    tint = if (state.isShuffleEnabled) activeAccent else extendedColors.onSurfaceMuted,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Smart Previous Button
-            IconButton(
-                onClick = { playbackConnection.smartPrevious() },
-                modifier = Modifier.size(52.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.SkipPrevious,
-                    contentDescription = "Previous Track (Smart Previous)",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-
-            // Hero Play/Pause Button (76dp)
-            Box(
-                modifier = Modifier
-                    .size(76.dp)
-                    .clip(CircleShape)
-                    .background(activeAccent),
-                contentAlignment = Alignment.Center
-            ) {
+                // Shuffle Button
                 IconButton(
-                    onClick = { playbackConnection.playPause() },
-                    modifier = Modifier.size(76.dp)
+                    onClick = { playbackConnection.toggleShuffle() },
+                    modifier = Modifier.size(48.dp)
                 ) {
-                    AnimatedContent(
-                        targetState = state.isPlaying,
-                        transitionSpec = { fadeIn() togetherWith fadeOut() },
-                        label = "playPauseHero"
-                    ) { playing ->
-                        Icon(
-                            imageVector = if (playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                            contentDescription = if (playing) "Pause" else "Play",
-                            tint = Color.Black,
-                            modifier = Modifier.size(42.dp)
-                        )
+                    Icon(
+                        imageVector = Icons.Rounded.Shuffle,
+                        contentDescription = "Toggle Shuffle",
+                        tint = if (state.isShuffleEnabled) activeAccent else extendedColors.onSurfaceMuted,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                // Smart Previous Button
+                IconButton(
+                    onClick = { playbackConnection.smartPrevious() },
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.SkipPrevious,
+                        contentDescription = "Previous Track (Smart Previous)",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+                // Hero Play/Pause Button (76dp)
+                Box(
+                    modifier = Modifier
+                        .size(76.dp)
+                        .clip(CircleShape)
+                        .background(activeAccent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { playbackConnection.playPause() },
+                        modifier = Modifier.size(76.dp)
+                    ) {
+                        AnimatedContent(
+                            targetState = state.isPlaying,
+                            transitionSpec = { fadeIn() togetherWith fadeOut() },
+                            label = "playPauseHero"
+                        ) { playing ->
+                            Icon(
+                                imageVector = if (playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                                contentDescription = if (playing) "Pause" else "Play",
+                                tint = Color.Black,
+                                modifier = Modifier.size(42.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            // Next Button
-            IconButton(
-                onClick = { playbackConnection.skipToNext() },
-                modifier = Modifier.size(52.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.SkipNext,
-                    contentDescription = "Next Track",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
+                // Next Button
+                IconButton(
+                    onClick = { playbackConnection.skipToNext() },
+                    modifier = Modifier.size(52.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.SkipNext,
+                        contentDescription = "Next Track",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
 
-            // Repeat Button
-            IconButton(
-                onClick = { playbackConnection.toggleRepeat() },
-                modifier = Modifier.size(48.dp)
-            ) {
-                val icon = when (state.repeatState) {
-                    RepeatState.ONE -> Icons.Rounded.RepeatOne
-                    else -> Icons.Rounded.Repeat
+                // Repeat Button
+                IconButton(
+                    onClick = { playbackConnection.toggleRepeat() },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    val icon = when (state.repeatState) {
+                        RepeatState.ONE -> Icons.Rounded.RepeatOne
+                        else -> Icons.Rounded.Repeat
+                    }
+                    val tint = if (state.repeatState != RepeatState.OFF) {
+                        activeAccent
+                    } else {
+                        extendedColors.onSurfaceMuted
+                    }
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Toggle Repeat",
+                        tint = tint,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
-                val tint = if (state.repeatState != RepeatState.OFF) {
-                    activeAccent
-                } else {
-                    extendedColors.onSurfaceMuted
-                }
-                Icon(
-                    imageVector = icon,
-                    contentDescription = "Toggle Repeat",
-                    tint = tint,
-                    modifier = Modifier.size(24.dp)
-                )
             }
         }
 
@@ -427,12 +449,21 @@ fun NowPlayingScreen(
             onDismiss = { showSleepTimer = false }
         )
     }
+
+    if (showSignalPathDialog) {
+        SignalPathDialog(
+            track = track,
+            isEqEnabled = audioEffectsController?.state?.value?.isEnabled == true,
+            onDismiss = { showSignalPathDialog = false }
+        )
+    }
 }
 
 @Composable
 private fun PlayerHeroView(
     track: com.pulse.player.domain.model.Track,
-    isPlaying: Boolean
+    isPlaying: Boolean,
+    onBadgeClick: () -> Unit
 ) {
     val extendedColors = LocalExtendedColors.current
 
@@ -507,7 +538,11 @@ private fun PlayerHeroView(
         Spacer(modifier = Modifier.height(10.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { onBadgeClick() }
+                .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             AudioFormatBadge(
                 badgeText = info.badgeText,

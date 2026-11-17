@@ -1,6 +1,7 @@
 package com.pulse.player.ui.equalizer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.GraphicEq
+import androidx.compose.material.icons.rounded.Headphones
 import androidx.compose.material.icons.rounded.SurroundSound
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Waves
@@ -36,12 +39,17 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pulse.player.service.audiofx.AudioEffectsController
 import com.pulse.player.service.audiofx.EqualizerBand
+import com.pulse.player.ui.equalizer.autoeq.AutoEqDialog
 import com.pulse.player.ui.theme.LocalExtendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +61,7 @@ fun EqualizerSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val state by audioEffectsController.state.collectAsState()
     val extendedColors = LocalExtendedColors.current
+    var showAutoEq by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -104,7 +113,48 @@ fun EqualizerSheet(
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // AutoEQ Headphone Profiles Entry
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .border(0.75.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                    .clickable { showAutoEq = true }
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Headphones,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "AutoEQ Correction",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "4,000+ headphone models & target curves",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = extendedColors.onSurfaceMuted
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Presets Horizontal Chip Bar
             Text(
@@ -118,9 +168,14 @@ fun EqualizerSheet(
                     val isSelected = state.currentPreset.equals(presetName, ignoreCase = true)
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(12.dp))
                             .background(
                                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                            )
+                            .border(
+                                width = if (isSelected) 1.5.dp else 0.75.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                                shape = RoundedCornerShape(12.dp)
                             )
                             .clickable(enabled = state.isEnabled) {
                                 audioEffectsController.setPreset(presetName)
@@ -194,6 +249,12 @@ fun EqualizerSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showAutoEq) {
+        AutoEqDialog(
+            onDismiss = { showAutoEq = false }
+        )
     }
 }
 

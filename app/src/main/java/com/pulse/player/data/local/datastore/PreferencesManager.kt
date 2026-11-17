@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.pulse.player.ui.theme.AccentChoice
@@ -29,6 +31,25 @@ class PreferencesManager @Inject constructor(
         val KEY_LIQUID_GLASS = booleanPreferencesKey("liquid_glass_enabled")
         val KEY_GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         val KEY_AUDD_API_KEY = stringPreferencesKey("audd_api_key")
+        val KEY_LASTFM_API_KEY = stringPreferencesKey("lastfm_api_key")
+        val KEY_LASTFM_API_SECRET = stringPreferencesKey("lastfm_api_secret")
+        val KEY_LASTFM_SESSION_KEY = stringPreferencesKey("lastfm_session_key")
+        val KEY_LASTFM_USERNAME = stringPreferencesKey("lastfm_username")
+        val KEY_LASTFM_SCROBBLING_ENABLED = booleanPreferencesKey("lastfm_scrobbling_enabled")
+        val KEY_LAST_BACKUP_TIMESTAMP = longPreferencesKey("last_backup_timestamp")
+        val KEY_LAST_BACKUP_NAME = stringPreferencesKey("last_backup_name")
+        val KEY_EQ_ENABLED = booleanPreferencesKey("eq_enabled")
+        val KEY_EQ_PRESET = stringPreferencesKey("eq_preset")
+        val KEY_BASS_BOOST = intPreferencesKey("eq_bass_boost")
+        val KEY_VIRTUALIZER = intPreferencesKey("eq_virtualizer")
+    }
+
+    val lastBackupTimestampFlow: Flow<Long?> = context.pulseDataStore.data.map { prefs ->
+        prefs[KEY_LAST_BACKUP_TIMESTAMP]
+    }
+
+    val lastBackupNameFlow: Flow<String?> = context.pulseDataStore.data.map { prefs ->
+        prefs[KEY_LAST_BACKUP_NAME]
     }
 
     val themeModeFlow: Flow<ThemeMode> = context.pulseDataStore.data.map { prefs ->
@@ -57,6 +78,34 @@ class PreferencesManager @Inject constructor(
         prefs[KEY_AUDD_API_KEY] ?: ""
     }
 
+    val lastFmApiKeyFlow: Flow<String> = context.pulseDataStore.data.map { it[KEY_LASTFM_API_KEY] ?: "" }
+    val lastFmApiSecretFlow: Flow<String> = context.pulseDataStore.data.map { it[KEY_LASTFM_API_SECRET] ?: "" }
+    val lastFmSessionKeyFlow: Flow<String> = context.pulseDataStore.data.map { it[KEY_LASTFM_SESSION_KEY] ?: "" }
+    val lastFmUsernameFlow: Flow<String> = context.pulseDataStore.data.map { it[KEY_LASTFM_USERNAME] ?: "" }
+    val lastFmScrobblingEnabledFlow: Flow<Boolean> = context.pulseDataStore.data.map { it[KEY_LASTFM_SCROBBLING_ENABLED] ?: false }
+
+    suspend fun setLastFmSession(apiKey: String, apiSecret: String, sessionKey: String, username: String) {
+        context.pulseDataStore.edit {
+            it[KEY_LASTFM_API_KEY] = apiKey.trim()
+            it[KEY_LASTFM_API_SECRET] = apiSecret.trim()
+            it[KEY_LASTFM_SESSION_KEY] = sessionKey.trim()
+            it[KEY_LASTFM_USERNAME] = username.trim()
+            it[KEY_LASTFM_SCROBBLING_ENABLED] = sessionKey.isNotBlank()
+        }
+    }
+
+    suspend fun setLastFmScrobblingEnabled(enabled: Boolean) {
+        context.pulseDataStore.edit { it[KEY_LASTFM_SCROBBLING_ENABLED] = enabled }
+    }
+
+    suspend fun clearLastFmSession() {
+        context.pulseDataStore.edit {
+            it.remove(KEY_LASTFM_SESSION_KEY)
+            it.remove(KEY_LASTFM_USERNAME)
+            it[KEY_LASTFM_SCROBBLING_ENABLED] = false
+        }
+    }
+
     suspend fun setThemeMode(mode: ThemeMode) {
         context.pulseDataStore.edit { it[KEY_THEME_MODE] = mode.name }
     }
@@ -79,5 +128,12 @@ class PreferencesManager @Inject constructor(
 
     suspend fun setAuddApiKey(key: String) {
         context.pulseDataStore.edit { it[KEY_AUDD_API_KEY] = key.trim() }
+    }
+
+    suspend fun recordBackup(fileName: String, timestamp: Long = System.currentTimeMillis()) {
+        context.pulseDataStore.edit {
+            it[KEY_LAST_BACKUP_NAME] = fileName
+            it[KEY_LAST_BACKUP_TIMESTAMP] = timestamp
+        }
     }
 }

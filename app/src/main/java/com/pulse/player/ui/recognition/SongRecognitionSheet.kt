@@ -217,7 +217,7 @@ private fun MicrophonePermissionCard(
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
@@ -700,7 +700,7 @@ private fun RecognitionFailedView(
         Box(
             modifier = Modifier
                 .size(68.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(18.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
@@ -805,7 +805,7 @@ private fun IdleListeningPromptView(
         Box(
             modifier = Modifier
                 .size(80.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(22.dp))
                 .background(accent.copy(alpha = 0.16f))
                 .clickable { onStart() },
             contentAlignment = Alignment.Center

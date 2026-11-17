@@ -223,7 +223,9 @@ fun ErrorLogsScreen(
                 TextButton(onClick = { showClearDialog = false }) {
                     Text(text = "Cancel")
                 }
-            }
+            },
+            shape = RoundedCornerShape(22.dp),
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 }
@@ -265,7 +267,7 @@ private fun ErrorLogItem(log: ErrorLogEntity) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(6.dp))
                         .background(badgeColor)
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {

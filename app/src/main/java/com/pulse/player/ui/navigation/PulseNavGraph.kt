@@ -33,6 +33,14 @@ fun PulseNavGraph(
                     navController.navigate(Screen.Library.route) {
                         launchSingleTop = true
                     }
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Screen.Search.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onTrackClick = { track, queue ->
+                    playbackConnection.playTrack(track, queue)
                 }
             )
         }
