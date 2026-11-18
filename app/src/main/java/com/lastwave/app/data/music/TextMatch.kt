@@ -189,9 +189,16 @@ internal object TextMatch {
 
         if (cleanCandidate == normWanted) return true
 
+        val rawCandidate = if (artist.isNotBlank()) {
+            val normArtist = normalize(artist)
+            if (normArtist.isNotBlank() && normCandidate.startsWith(normArtist)) {
+                candidateTitle.substring(minOf(candidateTitle.length, artist.length)).trim().removePrefix("-").trim()
+            } else candidateTitle
+        } else candidateTitle
+
         val baseWanted = normalize(baseTitle(wantedTitle))
-        val baseCandidate = normalize(baseTitle(cleanCandidate))
-        if (baseWanted.isNotBlank() && baseWanted == baseCandidate) return true
+        val baseCandidate = normalize(baseTitle(rawCandidate))
+        if (baseWanted.isNotBlank() && (baseWanted == baseCandidate || baseWanted == normalize(baseTitle(cleanCandidate)))) return true
 
         val wantedTokens = tokens(wantedTitle)
         val candidateTokens = tokens(cleanCandidate)

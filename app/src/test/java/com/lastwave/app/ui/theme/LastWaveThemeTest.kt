@@ -12,8 +12,8 @@ class LastWaveThemeTest {
 
         assertThat(scheme.primary).isEqualTo(Color(0xFFC9FB00))
         assertThat(scheme.onPrimary).isEqualTo(Color(0xFF012226))
-        assertThat(scheme.surface).isEqualTo(Color(0xFF012226))
-        assertThat(scheme.background).isEqualTo(Color(0xFF01181B))
+        assertThat(scheme.surface).isEqualTo(Color(0xFF0C0C0E))
+        assertThat(scheme.background).isEqualTo(Color(0xFF0C0C0E))
     }
 
     @Test

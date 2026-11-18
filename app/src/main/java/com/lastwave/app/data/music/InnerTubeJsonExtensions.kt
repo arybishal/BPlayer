@@ -151,7 +151,7 @@ internal fun isSuggestionShelf(shelf: JsonObject): Boolean {
     val contents = shelf.array("contents") ?: shelf.array("items")
     if (contents != null && contents.isNotEmpty()) {
         val songItems = contents.mapNotNull { it.asObject()?.obj("musicResponsiveListItemRenderer") ?: it.asObject() }
-            .filter { it.obj("playlistItemData") != null || it.array("flexColumns") != null }
+            .filter { it.obj("playlistItemData") != null || it.array("flexColumns") != null || it.obj("playlistEditEndpoint") != null || isSuggestionItem(it) }
         if (songItems.isNotEmpty() && songItems.all(::isSuggestionItem)) {
             return true
         }

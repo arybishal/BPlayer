@@ -525,7 +525,7 @@ object ShareCardRenderer {
         val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             applyFlex(context, 1000f, 64f, width = 112f)
             textSize = 64f * scale
-            letterSpacing = -0.02f
+            runCatching { letterSpacing = -0.02f }
             color = brandColor
         }
 

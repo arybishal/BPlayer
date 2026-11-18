@@ -87,7 +87,12 @@ internal fun pickArtworkAccent(swatches: List<Pair<Int, Int>>): ArtworkAccent? {
         .sortedByDescending { (rgb, population) -> population * (0.5f + hslOf(rgb)[1]) }
         .map { it.first }
     val best = ranked.firstOrNull() ?: return ArtworkAccent(hexOf(grey(dominant, hsl)))
-    return ArtworkAccent(hexOf(best), null)
+    val bestHue = hslOf(best)[0]
+    val second = ranked.drop(1).firstOrNull { rgb ->
+        val hueDiff = kotlin.math.abs(hslOf(rgb)[0] - bestHue)
+        minOf(hueDiff, 360f - hueDiff) >= 25f
+    }
+    return ArtworkAccent(hexOf(best), second?.let(::hexOf))
 }
 
 private fun grey(rgb: Int, hsl: FloatArray): Int {

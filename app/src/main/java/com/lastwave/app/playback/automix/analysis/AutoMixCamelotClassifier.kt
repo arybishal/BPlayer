@@ -72,18 +72,23 @@ object AutoMixCamelotClassifier {
         }
 
         // Accidental and tonality normalization
-        var root = clean.lowercase()
+        val lower = clean.lowercase()
+        val isMinor = lower.contains("minor") || lower.contains("min") || lower.endsWith("m")
+
+        var root = lower
             .replace("sharp", "#")
             .replace("flat", "b")
             .replace("♯", "#")
             .replace("♭", "b")
-            .replace("maj", " major")
-            .replace("min", " minor")
-            .replace("m", " minor")
+            .replace("major", "")
+            .replace("minor", "")
+            .replace("maj", "")
+            .replace("min", "")
             .trim()
 
-        val isMinor = root.contains("minor") || root.endsWith("m")
-        root = root.replace("minor", "").replace("major", "").trim()
+        if (root.length > 1 && root.endsWith("m")) {
+            root = root.dropLast(1).trim()
+        }
 
         val pitchClass = when (root) {
             "c" -> 0

@@ -417,7 +417,7 @@ internal fun InnerTubeMusicApi.parseBackgroundHeroUrl(root: JsonElement): String
      * Walks contents.singleColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents
      * and maps each musicCarouselShelfRenderer using [parseCarouselShelf].
      */
-internal fun InnerTubeMusicApi.parseHomeShelves(root: JsonElement): List<HomeShelf> {
+internal fun InnerTubeMusicApi.parseHomeShelvesInternal(root: JsonElement): List<HomeShelf> {
         val rootObj = root.asObject() ?: return emptyList()
         val sectionContents = rootObj.obj("contents")
             ?.obj("singleColumnBrowseResultsRenderer")

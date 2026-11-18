@@ -45,9 +45,12 @@ object Md3SchemeBuilder {
     private val AmoledSurfaceBright = Color(0xFF222222)
 
     private fun parseColor(hex: String, fallback: Int = 0xFFE03030.toInt()): Int {
-        val clean = hex.trim()
-        val formatted = if (clean.startsWith("#")) clean else "#$clean"
-        return runCatching { android.graphics.Color.parseColor(formatted) }.getOrDefault(fallback)
+        val clean = hex.trim().removePrefix("#")
+        return when (clean.length) {
+            6 -> (0xFF000000L or clean.toLong(16)).toInt()
+            8 -> clean.toLong(16).toInt()
+            else -> fallback
+        }
     }
 
     /** Extracts just the hue (0-360) from a hex color. */

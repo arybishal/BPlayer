@@ -41,7 +41,7 @@ Welcome to **BPlayer v1.1.0**, delivering the complete adaptation of the **LastW
 - **Application ID**: `com.pulse.player`
 - **Version Code**: `2`
 - **Version Name**: `1.1.0`
-- **SHA-256 Checksum**: `F13CFC6C0DBC0D3DD855E4238B4A704EDFA25B01FBFEC500728BD25735E8104F`
+- **SHA-256 Checksum**: `A270AF4215BFBB470CE3AAF52EB796DAA7DBFBF5757D714A24DD17F782E79CAF`
 - **Target Android**: Android 8.0+ (API 26 to 35)
 
 ---

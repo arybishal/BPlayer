@@ -77,7 +77,7 @@ import javax.inject.Singleton
  * permanently tying search to a stale build identifier.
  */
 @Singleton
-class InnerTubeMusicApi @Inject constructor(
+open class InnerTubeMusicApi @Inject constructor(
     internal val http: OkHttpClient,
     internal val streamExtractor: YouTubeStreamExtractor,
     internal val innerTubeXExtractor: InnerTubeXStreamExtractor,
@@ -85,6 +85,9 @@ class InnerTubeMusicApi @Inject constructor(
     internal val settingsPreferences: SettingsPreferences,
     @dagger.hilt.android.qualifiers.ApplicationContext internal val appContext: Context,
 ) {
+    open fun parseHomeShelves(root: JsonElement): List<HomeShelf> =
+        parseHomeShelvesInternal(root)
+
     internal val json = Json { ignoreUnknownKeys = true }
     // Keep YouTube API/extraction/media on the same OkHttp transport identity.
     // A separate pool or DNS policy can select a different route on VPNs and

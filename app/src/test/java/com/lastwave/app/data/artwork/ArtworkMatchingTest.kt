@@ -9,7 +9,7 @@ class ArtworkMatchingTest {
     @Test
     fun testHighResProvidersSet() {
         assertThat(ArtworkNormalizer.HIGH_RES_PROVIDERS).containsExactly(
-            "spotify", "apple", "itunes", "tidal", "deezer", "lastfm", "youtube_music", "ytmusic"
+            "spotify", "apple", ArtworkNormalizer.ITUNES_ARTIST_MATCH_CACHE_PROVIDER, "tidal", "deezer", "lastfm", "youtube_music", "ytmusic"
         )
         assertThat(ArtworkNormalizer.HIGH_RES_PROVIDERS).doesNotContain("youtube")
         assertThat(ArtworkNormalizer.HIGH_RES_PROVIDERS).doesNotContain("none")
