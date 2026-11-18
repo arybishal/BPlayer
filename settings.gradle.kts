@@ -1,14 +1,19 @@
 pluginManagement {
-    repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
+    buildscript {
+        repositories {
+            google()
+            mavenCentral()
+            maven { url = uri("https://storage.googleapis.com/r8-releases/raw") }
         }
+        dependencies {
+            classpath("com.android.tools:r8:9.4.14")
+        }
+    }
+    repositories {
+        google()
         mavenCentral()
         gradlePluginPortal()
+        maven { url = uri("https://storage.googleapis.com/r8-releases/raw") }
     }
 }
 dependencyResolutionManagement {
@@ -16,7 +21,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = java.net.URI("https://jitpack.io") }
+        maven("https://jitpack.io")
     }
 }
 

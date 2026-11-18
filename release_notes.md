@@ -1,46 +1,50 @@
-# BPlayer v1.0.0 — Initial Official Release 🎵
+# BPlayer v1.1.0 — Complete LastWave-Native Adaptation & Release 🎵
 
-Welcome to the first official release of **BPlayer**, an exquisite, audiophile-grade offline music player for Android built with Jetpack Compose, Material 3, AndroidX Media3 (`MediaLibraryService`), and advanced DSP architecture derived from the open-source LastWave-Native project.
-
----
-
-### 🌟 What's New in v1.0.0
-
-- **🎧 AutoEQ Headphone Correction Engine**:
-  - Over 4,000 lab measurements and calibration curves (Crinacle, Oratory1990, Rtings).
-  - Real-time frequency response canvas with target curve compensation (Harman, IEF Neutral, Optimum HiFi).
-  - Levenberg-Marquardt biquad filter fitter generating up to 10 parametric filters with auto-preamp.
-
-- **🔬 Poweramp-Style Signal Path Audit**:
-  - End-to-end hardware pipeline audit: Source Stream, 32-bit Float DSP Engine, and Android HAL / AudioTrack output.
-  - Bit-perfect verdict pill auditing pristine bit-exact playback.
-
-- **📻 Last.fm Scrobbler**:
-  - Real-time Now Playing notifications and scrobble tracking at 50% or 240 seconds.
-  - Offline retry queue storing scrobbles locally and automatically syncing when back online.
-  - Secure MD5 mobile authentication.
-
-- **🔒 Military-Grade Backup & Restore System**:
-  - AES-256-GCM authenticated encryption with PBKDF2-HMAC-SHA256 password protection.
-  - Backs up app settings, playlists, favorites, custom equalizer presets, and encrypted credentials into a single `.pulsebackup` file.
-  - Fuzzy track reconciliation matching songs across device storage by title, artist, album, and duration.
-
-- **🚗 Android Auto & Automotive OS**:
-  - Seamless in-car browsing (`ROOT` -> `TRACKS`, `FAVORITES`) via AndroidX `MediaLibraryService`.
-
-- **🔌 Decent USB Audio Driver**:
-  - Bit-perfect external USB DAC audio output with 16KB page-aligned native C++ runtime (`liblastwave_audio.so`, `libdecent_usb_audio.so`).
-
-- **🎨 Exquisite Liquid Glass UI (Strictly NO Blue Gradients)**:
-  - Eliminated all oval/circular bubbles in favor of sleek Material 3 Bottom Sheets and rounded cards (`14.dp` to `24.dp`).
-  - Warm, organic foundation palettes (Charcoal Dark, Pitch Black AMOLED, Warm Light) and curated warm accents (Amber, Coral, Emerald).
-
-- **📜 Synchronized Precision Lyrics & Tag Editor**:
-  - Embedded ID3 & sidecar `.lrc` reader with tap-to-seek, built-in LRC editor, and online LRCLIB / Gemini AI fallback.
-  - Scoped storage in-place tag editing using JAudioTagger (`MediaStore.createWriteRequest`).
+Welcome to **BPlayer v1.1.0**, delivering the complete adaptation of the **LastWave-Native Liquid Glass design system** and modern audio architecture into BPlayer with dedicated branding and application ID preservation (`com.pulse.player`).
 
 ---
 
-### 📦 Installation
+### 🌟 What's New in v1.1.0
 
-Download **`BPlayer-v1.0.0.apk`** below and install it directly on your Android device (Android 8.0 / API 26 or higher).
+- **✨ Complete LastWave-Native Liquid Glass Design System**:
+  - Full Liquid Glass optical translucency with 1dp boundary borders and backdrop blur.
+  - Google Sans Flex responsive variable typography.
+  - 19 curated preset color palettes with dynamic Monet wallpaper adaptation.
+  - Pure Black AMOLED mode (`#000000`) and Obsidian Dark theme (`#0F1115`).
+  - Strict Warm Palette compliance: zero blue gradients or generic tech templates.
+
+- **📻 Dynamic Home Feed & Discovery**:
+  - "Made For You" infinite radio station generated dynamically from listening history.
+  - Quick access vibes (Podcasts, Relax, Workout, Energize).
+  - Liked Songs and Discover Mix stations.
+
+- **🎧 Audiophile Audio Engine & DSP**:
+  - High-precision Oboe C++ native audio engine with low-latency AAudio and OpenSL ES.
+  - Decent USB Audio Driver: bit-perfect external USB DAC output with 16KB memory page alignment.
+  - 15-band precision graphic equalizer with real-time response curves and presets.
+  - AutoEQ Headphone Correction with 4,000+ lab-calibrated frequency curves.
+  - Poweramp-style Hardware Signal Path Audit (Source Stream -> Float32 DSP -> HAL Output).
+
+- **📜 Synchronized Precision LRC Lyrics & Editor**:
+  - Full-bleed synced lyrics with millisecond tracking, active line glow, and built-in editor.
+
+- **🔒 Privacy & Storage Architecture**:
+  - AES-256-GCM encrypted backup & restore with fuzzy track reconciliation (`.bplayerbackup` / `.pulsebackup`).
+  - Scoped storage in-place ID3/FLAC/Vorbis audio tag editing.
+  - GitHub In-App Updater directly integrated with `https://api.github.com/repos/arybishal/BPlayer/releases`.
+
+---
+
+### 📦 Release Artifacts & Checksums
+
+- **APK File**: `BPlayer-v1.1.0-release.apk`
+- **Application ID**: `com.pulse.player`
+- **Version Code**: `2`
+- **Version Name**: `1.1.0`
+- **SHA-256 Checksum**: `F13CFC6C0DBC0D3DD855E4238B4A704EDFA25B01FBFEC500728BD25735E8104F`
+- **Target Android**: Android 8.0+ (API 26 to 35)
+
+---
+
+### ⚖️ Licensing
+Licensed under the **GNU General Public License v3.0 (GPL-3.0)**. Incorporates open-source components from LastWave-Native and Decent USB Audio.

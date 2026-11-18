@@ -1,60 +1,101 @@
-# Pulse Android Music Player ProGuard / R8 Rules
+# Retrofit/OkHttp ship their own consumer rules; these silence R8 warnings
+# on optional dependencies they reference reflectively but this app doesn't use.
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
 
-# Room Database
--keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class * { *; }
--keep @androidx.room.Dao interface * { *; }
--keep class * extends androidx.room.TypeConverter
--dontwarn androidx.room.paging.**
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
 
-# AndroidX Media3 (ExoPlayer & MediaSession)
--keep class androidx.media3.** { *; }
--dontwarn androidx.media3.**
--keepattributes *Annotation*
+# JNI exports use the Kotlin class and method names verbatim.
+-keep class com.lastwave.app.playback.NativeAudioEngine { *; }
+-keep class com.lastwave.app.data.lossless.NativeSecrets { *; }
 
-# JAudioTagger (uses reflection for ID3 and tag headers)
--keep class org.jaudiotagger.** { *; }
--dontwarn org.jaudiotagger.**
-
-# Kotlinx Serialization
--keepattributes *Annotation*,InnerClasses
--dontnote kotlinx.serialization.SerializationKt
--keepclassmembers class * {
+# kotlinx.serialization: keep generated serializers and Serializable models
+-keepclassmembers class com.lastwave.app.** {
     *** Companion;
 }
--keepclasseswithmembers class * {
+-keepclasseswithmembers class com.lastwave.app.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
-
-# Retrofit & OkHttp
--dontwarn retrofit2.**
--dontwarn okhttp3.**
--keepattributes Signature
--keepattributes Exceptions
--keepclasseswithmembers class * {
-    @retrofit2.http.* <methods>;
+-keep,includedescriptorclasses class com.lastwave.app.**$$serializer { *; }
+-keepclassmembers @kotlinx.serialization.Serializable class * {
+    *** Companion;
+    kotlinx.serialization.KSerializer serializer(...);
 }
+-keep,includedescriptorclasses @kotlinx.serialization.Serializable class * { *; }
+-keep,includedescriptorclasses class * implements kotlinx.serialization.KSerializer { *; }
 
-# Coil Image Loader
--keep class coil.** { *; }
--dontwarn coil.**
+# Room: entities/DAOs are referenced by generated code via reflection-free
+# codegen already, but keep annotations so schema export keeps working.
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class *
 
-# Pulse / BPlayer Domain & State Models
--keep class com.pulse.player.domain.model.** { *; }
--keep class com.pulse.player.service.model.** { *; }
--keep class com.pulse.player.data.remote.** { *; }
--keep class com.pulse.player.data.local.entity.** { *; }
--keep class com.pulse.player.data.autoeq.** { *; }
--keep class com.pulse.player.data.scrobbler.** { *; }
--keep class com.pulse.player.domain.model.backup.** { *; }
--keep class com.lastwave.** { *; }
--keep class com.decent.usbaudio.** { *; }
+# Hilt/Dagger generated components
+-keep class dagger.hilt.internal.aggregatedroot.codegen.** { *; }
+-keep class hilt_aggregated_deps.** { *; }
 
-# JNI & Native methods
--keepclasseswithmembernames class * {
-    native <methods>;
-}
+# Glance app widgets and action callbacks
+-keep class * implements androidx.glance.appwidget.action.ActionCallback { *; }
+-keep class * extends androidx.glance.appwidget.action.ActionCallback { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+-keep class com.lastwave.app.widget.** { *; }
 
-# Coroutines
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+# NewPipe's YouTube extractor loads service implementations and its
+# JavaScript deobfuscation engine dynamically.
+-keep class org.schabi.newpipe.extractor.** { *; }
+-dontwarn org.schabi.newpipe.extractor.**
+-keep class org.jsoup.** { *; }
+-dontwarn org.jsoup.**
+-dontwarn java.beans.**
+# NewPipe's JS engine (Rhino) resolves classes by name at runtime
+# (Context.getRegExpProxy() → org.mozilla.javascript.regexp.RegExpImpl,
+#  Context.createInterpreter, script compilation) and the jar bundles no
+# consumer R8 rules. Under shrinking the release path silently loses the
+# player-JS deobfuscation (the unminified rawRelease hides this). Keep the
+# whole engine plus ClassFileWriter, which is instantiated reflectively for
+# compiled scripts.
+-keep class org.mozilla.javascript.** { *; }
+-keep class org.mozilla.classfile.ClassFileWriter { *; }
+-dontwarn org.mozilla.javascript.**
+-dontwarn org.mozilla.classfile.**
+-dontwarn javax.script.**
+
+# InnerTubeX is reached through the Kotlin-compatibility reflection boundary;
+# retain its public constructors/models and the selected Ktor engine in release
+# variants so extraction cannot be removed as unreachable code.
+-keep class com.metrolist.innertubex.** { *; }
+-keep class io.ktor.client.HttpClientJvmKt { *; }
+-keep class io.ktor.client.HttpClientKt { *; }
+-keep class io.ktor.client.engine.cio.** { *; }
+
+# Kyant Backdrop (AndroidLiquidGlass): AGSL RuntimeShader strings and
+# RenderEffect bridges are reached via Compose runtime — keep in release builds.
+-keep class com.kyant.backdrop.** { *; }
+-keep class com.kyant.shapes.** { *; }
+
+# Silence R8 missing-class warnings for Kotlin 2.x standard library and IO additions
+# referenced by the InnerTubeX runtime jar.
+-dontwarn kotlin.**
+-dontwarn kotlinx.io.**
+-dontwarn kotlinx.coroutines.**
+-dontwarn kotlinx.serialization.**
+-dontwarn com.metrolist.innertubex.**
+-dontwarn io.ktor.**
+
+# Keep all InnerTube Search, Browse, and Music JSON data models
+-keep @androidx.annotation.Keep class * { *; }
+-keepclassmembers @androidx.annotation.Keep class * { *; }
+-keep class com.lastwave.app.data.music.** { *; }
+-keepclassmembers class com.lastwave.app.data.music.** { *; }
+-keep class com.lastwave.app.data.podcast.** { *; }
+-keepclassmembers class com.lastwave.app.data.podcast.** { *; }
+
+
+# Shrink and optimize, but do not rename classes/members. LastWave is open
+# source, so renaming hides nothing, and the scrambled single-letter names
+# (a.b.c) are what Huorong's static TrojanDropper/Android.Agent heuristic
+# matched: the unobfuscated rawRelease build of the same code scans clean.
+-dontobfuscate
