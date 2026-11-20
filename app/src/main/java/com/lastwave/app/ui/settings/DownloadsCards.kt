@@ -48,7 +48,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FolderOpen
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
@@ -148,10 +151,15 @@ internal fun ActiveDownloadCard(
         label = "downloadProgress",
     )
 
+    val cardShape = RoundedCornerShape(18.dp)
+    val cardContainer = liquidGlassContainerColor(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
     Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)),
-        modifier = Modifier.fillMaxWidth(),
+        shape = cardShape,
+        colors = CardDefaults.cardColors(containerColor = cardContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape = cardShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
@@ -222,11 +230,16 @@ internal fun DownloadedTrackCard(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
+    val shape = groupShape(position)
+    val cardContainer = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+
     Card(
-        shape = groupShape(position),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = cardContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Row(
             modifier = Modifier

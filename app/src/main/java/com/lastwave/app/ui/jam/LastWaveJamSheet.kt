@@ -47,6 +47,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -137,11 +140,13 @@ fun LastWaveJamSheet(
         }
     }
 
+    val sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = sheetShape,
+        modifier = Modifier.liquidGlassChrome(sheetShape, preset = LiquidGlassPreset.ModalSheet),
     ) {
         Column(
             modifier = Modifier
@@ -267,10 +272,13 @@ fun LastWaveJamSheet(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Join Room Tab
+                    val joinCardShape = RoundedCornerShape(16.dp)
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidGlassChrome(joinCardShape, preset = LiquidGlassPreset.Card),
+                        shape = joinCardShape,
+                        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -334,10 +342,13 @@ fun LastWaveJamSheet(
                     }
                 } else {
                     // Create Room Tab
+                    val createCardShape = RoundedCornerShape(16.dp)
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .liquidGlassChrome(createCardShape, preset = LiquidGlassPreset.Card),
+                        shape = createCardShape,
+                        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -504,10 +515,13 @@ fun LastWaveJamSheet(
                 }
             } else {
                 // In Active Room State
+                val activeRoomShape = RoundedCornerShape(18.dp)
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlassChrome(activeRoomShape, preset = LiquidGlassPreset.Card),
+                    shape = activeRoomShape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -615,10 +629,13 @@ fun LastWaveJamSheet(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Synced Now Playing Card
+                val syncedCardShape = RoundedCornerShape(14.dp)
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlassChrome(syncedCardShape, preset = LiquidGlassPreset.Card),
+                    shape = syncedCardShape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
                 ) {
                     Row(
                         modifier = Modifier
@@ -777,12 +794,14 @@ fun LastWaveJamSheet(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // In-room live chat
+                val chatCardShape = RoundedCornerShape(14.dp)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(170.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        .height(170.dp)
+                        .liquidGlassChrome(chatCardShape, preset = LiquidGlassPreset.Card),
+                    shape = chatCardShape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHighest)),
                 ) {
                     Column(
                         modifier = Modifier

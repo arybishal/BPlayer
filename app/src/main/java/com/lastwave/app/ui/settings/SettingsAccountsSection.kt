@@ -186,6 +186,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -274,14 +277,17 @@ internal fun YouTubeAccountRow(
     isHighlighted: Boolean = false,
 ) {
     val shape = groupShape(position)
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .animateContentSize()
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
@@ -338,15 +344,18 @@ internal fun SpotifyAccountRow(
     isHighlighted: Boolean = false,
 ) {
     val shape = groupShape(position)
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
     Card(
         onClick = onClick,
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .animateContentSize()
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
@@ -434,14 +443,17 @@ internal fun LastFmIntegrationCard(
     var keyInput by remember { mutableStateOf("") }
     var secretInput by remember { mutableStateOf("") }
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
     Card(
         shape = CardOuterShape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(CardOuterShape, preset = LiquidGlassPreset.Card)
             .animateContentSize()
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = CardOuterShape),
     ) {

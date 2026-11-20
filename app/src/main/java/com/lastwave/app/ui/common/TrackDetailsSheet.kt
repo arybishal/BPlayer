@@ -78,6 +78,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import com.lastwave.app.data.download.TrackDownloadManager
 import com.lastwave.app.data.genre.GenreResolver
 import com.lastwave.app.data.local.db.DownloadedTrackDao
@@ -847,10 +851,14 @@ fun TrackDetailsSheet(
                     currentSpecs.trackNumber?.toString(),
                 ).isNotEmpty()
             ) {
+                val shape = RoundedCornerShape(20.dp)
                 Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                    modifier = Modifier.fillMaxWidth(),
+                    shape = shape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
                 ) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -912,10 +920,14 @@ fun TrackDetailsSheet(
 
             // 5. About / Wiki Summary
             if (!currentSpecs.wikiSummary.isNullOrBlank()) {
+                val shape = RoundedCornerShape(20.dp)
                 Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                    modifier = Modifier.fillMaxWidth(),
+                    shape = shape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
                 ) {
                     var expanded by remember { mutableStateOf(false) }
                     Column(
@@ -950,10 +962,14 @@ fun TrackDetailsSheet(
             }
 
             // 6. Audio & Stream Specifications Card
+            val specsShape = RoundedCornerShape(20.dp)
             Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                modifier = Modifier.fillMaxWidth(),
+                shape = specsShape,
+                colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlassChrome(shape = specsShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -979,10 +995,14 @@ fun TrackDetailsSheet(
             }
 
             // 7. Offline Storage Card
+            val storageShape = RoundedCornerShape(20.dp)
             Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                modifier = Modifier.fillMaxWidth(),
+                shape = storageShape,
+                colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlassChrome(shape = storageShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

@@ -93,7 +93,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lastwave.app.ui.generate.MixLauncher
 import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
 import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import com.lastwave.app.playback.toPlayableTrack
 import com.lastwave.app.playback.PlayableTrack
 import com.lastwave.app.ui.navigation.ArtistAlbumNavigator
@@ -718,11 +720,15 @@ fun TrackContextMenuSheet(
                     }
                     add { pos -> MenuActionRow(Icons.Filled.QueueMusic, stringResource(R.string.menu_add_queue), position = pos) { musicPlayer.addToQueue(playable); onDismiss() } }
                     add { pos ->
+                        val shape = groupShape(pos)
+                        val container = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
                         Card(
-                            shape = groupShape(pos),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            shape = shape,
+                            colors = CardDefaults.cardColors(containerColor = container),
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
                         ) {
                             PlayerCastMenuRow(musicPlayer)
                         }
@@ -849,18 +855,22 @@ private fun StartMixCard(onClick: () -> Unit) {
         label = "startMixScale",
     )
 
+    val shape = RoundedCornerShape(22.dp)
+    val container = liquidGlassContainerColor(MaterialTheme.colorScheme.primary)
+
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+        colors = CardDefaults.cardColors(containerColor = container),
         // 0dp deliberately — see ModeCard/SettingsToggleCard for why a
         // nonzero tonalElevation would blend a second tinted layer on top
         // of containerColor here.
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(22.dp),
+        shape = shape,
         interactionSource = interactionSource,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -917,18 +927,21 @@ private fun WatchVideoCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scale = rememberGroupPressScale(interactionSource)
+    val shape = RoundedCornerShape(22.dp)
+    val container = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor = container,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = RoundedCornerShape(22.dp),
+        shape = shape,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         interactionSource = interactionSource,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp)
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1007,16 +1020,20 @@ private fun QuickActionCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scale = rememberGroupPressScale(interactionSource)
+    val shape = RoundedCornerShape(22.dp)
+    val container = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        colors = CardDefaults.cardColors(containerColor = container),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(22.dp),
+        shape = shape,
         interactionSource = interactionSource,
-        modifier = modifier.graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        },
+        modifier = modifier
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 12.dp),
@@ -1048,16 +1065,22 @@ private fun MenuActionRow(
     val badgeColor = if (danger) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
     val badgeContentColor = if (danger) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer
 
+    val shape = groupShape(position)
+    val container = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        colors = CardDefaults.cardColors(containerColor = container),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = groupShape(position),
+        shape = shape,
         interactionSource = interactionSource,
-        modifier = Modifier.fillMaxWidth().graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
@@ -1092,16 +1115,21 @@ private fun MenuInfoRow(
     position: GroupPosition = GroupPosition.SINGLE,
     onClick: (() -> Unit)? = null,
 ) {
+    val shape = groupShape(position)
+    val container = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
+
     Card(
         onClick = onClick ?: {},
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        colors = CardDefaults.cardColors(containerColor = container),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = groupShape(position),
+        shape = shape,
         // Not actually interactive when there's no genre to open yet
         // (still resolving, or resolution came back empty) — no ripple,
         // no press feedback pretending there's something to tap.
         enabled = onClick != null,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),

@@ -58,6 +58,10 @@ import com.lastwave.app.data.canvas.CanvasSource
 import com.lastwave.app.ui.common.EdgeToEdgeDialogWindow
 import com.lastwave.app.ui.player.CanvasArtworkPlayer
 import com.lastwave.app.ui.player.CanvasContentMode
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import com.lastwave.app.ui.player.CanvasVideoPlayer
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
@@ -485,10 +489,14 @@ fun ArtistDetailScreen(
 
                                 if (!data.bio.isNullOrBlank()) {
                                     var isBioExpanded by remember { mutableStateOf(false) }
+                                    val bioShape = RoundedCornerShape(20.dp)
                                     Card(
-                                        shape = RoundedCornerShape(20.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = bioShape,
+                                        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .liquidGlassChrome(shape = bioShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
                                     ) {
                                         Column(Modifier.padding(16.dp)) {
                                             Text(
@@ -1173,11 +1181,15 @@ private fun ArtistAlbumCard(
     item: ArtistAlbumItem,
     onClick: () -> Unit,
 ) {
+    val cardShape = RoundedCornerShape(20.dp)
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        modifier = Modifier.width(150.dp),
+        shape = cardShape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .width(150.dp)
+            .liquidGlassChrome(shape = cardShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Column(Modifier.padding(10.dp)) {
             Box(
@@ -1239,11 +1251,15 @@ private fun SimilarArtistCard(
     artist: ArtistSummaryItem,
     onClick: () -> Unit,
 ) {
+    val cardShape = RoundedCornerShape(20.dp)
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        modifier = Modifier.width(130.dp),
+        shape = cardShape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .width(130.dp)
+            .liquidGlassChrome(shape = cardShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Column(
             modifier = Modifier.padding(10.dp),

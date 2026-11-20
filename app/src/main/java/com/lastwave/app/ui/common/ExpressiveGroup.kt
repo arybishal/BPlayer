@@ -38,6 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.Alignment
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
@@ -242,11 +246,12 @@ fun ExpressiveGroupRow(
     val scale = rememberGroupPressScale(interactionSource)
     val titleColor = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
     val shape = groupShape(position)
+    val rowContainer = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
 
     Card(
         onClick = onClick,
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        colors = CardDefaults.cardColors(containerColor = rowContainer),
         // 0dp deliberately: Material3's Card blends a primary-tinted alpha
         // layer on top of containerColor above 0dp tonalElevation, which
         // read as a second, unintended layer behind these rows' own tonal
@@ -255,6 +260,11 @@ fun ExpressiveGroupRow(
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
+            .liquidGlassChrome(
+                shape = shape,
+                enabled = LocalLiquidGlass.current,
+                preset = LiquidGlassPreset.Card,
+            )
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -321,15 +331,21 @@ fun ExpressiveGroupTrackRow(
     val haptics = LocalHapticFeedback.current
     val shape = groupShape(position)
     val playingContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+    val rowContainer = liquidGlassContainerColor(if (isPlaying) playingContainer else MaterialTheme.colorScheme.surfaceContainerHigh)
 
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying) playingContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor = rowContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
             .fillMaxWidth()
+            .liquidGlassChrome(
+                shape = shape,
+                enabled = LocalLiquidGlass.current,
+                preset = LiquidGlassPreset.Card,
+            )
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -437,7 +453,7 @@ fun ExpressiveGroupSelectRow(
     val interactionSource = remember { MutableInteractionSource() }
     val scale = rememberGroupPressScale(interactionSource)
     val shape = groupShape(position)
-    val containerColor by animateColorAsState(
+    val rawContainerColor by animateColorAsState(
         targetValue = if (selected) {
             MaterialTheme.colorScheme.primaryContainer
         } else {
@@ -446,6 +462,7 @@ fun ExpressiveGroupSelectRow(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "groupSelectRowBg",
     )
+    val containerColor = liquidGlassContainerColor(rawContainerColor)
 
     Card(
         onClick = onClick,
@@ -455,6 +472,11 @@ fun ExpressiveGroupSelectRow(
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
+            .liquidGlassChrome(
+                shape = shape,
+                enabled = LocalLiquidGlass.current,
+                preset = LiquidGlassPreset.Card,
+            )
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale

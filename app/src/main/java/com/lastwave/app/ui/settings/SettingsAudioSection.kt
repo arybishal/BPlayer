@@ -186,6 +186,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -289,14 +292,17 @@ internal fun CrossfadeDurationRow(
         else -> "Extended cinematic crossfade"
     }
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
@@ -396,10 +402,12 @@ internal fun AutoMixControlsCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card),
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
             Row(
@@ -528,10 +536,12 @@ internal fun MusicHapticsControlsCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card),
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
             if (isUsbExclusiveActive) {

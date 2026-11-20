@@ -48,7 +48,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.FolderOpen
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
@@ -337,11 +340,14 @@ internal fun DownloadedArtistsList(
                 items = artists,
                 key = { _, item -> item.name },
             ) { index, artist ->
+                val shape = groupShape(groupPositionFor(index, artists.size))
                 Card(
-                    shape = groupShape(groupPositionFor(index, artists.size)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    shape = shape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
                         .clickable { onSelectArtist(artist) },
                 ) {
                     Row(
@@ -488,11 +494,14 @@ internal fun DownloadedAlbumsList(
                 items = albums,
                 key = { _, item -> "${item.title}_${item.artist}" },
             ) { index, album ->
+                val shape = groupShape(groupPositionFor(index, albums.size))
                 Card(
-                    shape = groupShape(groupPositionFor(index, albums.size)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    shape = shape,
+                    colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
                         .clickable { onSelectAlbum(album) },
                 ) {
                     Row(
@@ -616,10 +625,14 @@ internal fun ArtistDetailView(
     ) {
         // Artist Hero Card
         item {
+            val heroShape = RoundedCornerShape(24.dp)
             Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                modifier = Modifier.fillMaxWidth(),
+                shape = heroShape,
+                colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlassChrome(shape = heroShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
             ) {
                 Column(
                     modifier = Modifier
@@ -709,11 +722,14 @@ internal fun ArtistDetailView(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     itemsIndexed(albums, key = { index, album -> "${album.artist}_${album.title}_$index" }) { _, album ->
+                        val cardShape = RoundedCornerShape(16.dp)
                         Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            shape = cardShape,
+                            colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                             modifier = Modifier
                                 .width(130.dp)
+                                .liquidGlassChrome(shape = cardShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
                                 .clickable { onSelectAlbum(album.title) },
                         ) {
                             Column(Modifier.padding(8.dp)) {
@@ -821,10 +837,14 @@ internal fun AlbumDetailView(
     ) {
         // Album Hero Card
         item {
+            val heroShape = RoundedCornerShape(24.dp)
             Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                modifier = Modifier.fillMaxWidth(),
+                shape = heroShape,
+                colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlassChrome(shape = heroShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
             ) {
                 Column(
                     modifier = Modifier

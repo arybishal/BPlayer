@@ -187,6 +187,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -288,14 +291,18 @@ internal fun AppIconSelectorCard(
         label = "appIconArrowRotation",
     )
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
+
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
         Column(
@@ -403,14 +410,18 @@ internal fun ThemeModeSelectorCard(
 ) {
     val shape = groupShape(position)
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
+
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
         Column(
@@ -473,8 +484,10 @@ internal fun AboutCard(
     val context = LocalContext.current
     Card(
         shape = CardOuterShape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlassChrome(CardOuterShape, preset = LiquidGlassPreset.Card),
     ) {
         Column(
             Modifier.fillMaxWidth().padding(vertical = 28.dp, horizontal = 20.dp),

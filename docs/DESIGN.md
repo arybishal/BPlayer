@@ -13,6 +13,38 @@ BPlayer is built upon a philosophy of **calm, tactile minimalism and content cel
 
 ---
 
+## 1.1 PERMANENT DESIGN RULES - STRICTLY ENFORCED
+
+> [!IMPORTANT]
+> **MANDATORY DESIGN DIRECTIVE & LOCK: LASTWAVE VISUAL FIDELITY RULE**:
+> LastWave-Native (`D:\Webapp\BPlayer\wave\LastWave-Native`) is the **authoritative visual reference for BPlayer**. Future developers and coding agents must not independently redesign, simplify, flatten, recolor, replace or remove the established visual design.
+> 
+> **The existing BPlayer feature set must be preserved while the reference design is reproduced.**
+> 
+> Any proposed visual change must:
+> 1. Be compared against LastWave side-by-side.
+> 2. Be documented in `qa/SIDE_BY_SIDE_DESIGN_COMPARISON.md`.
+> 3. Be checked for impact on existing features.
+> 4. Receive explicit user approval before implementation if it changes the established design direction.
+> 
+> Under no circumstances may BPlayer be redesigned into an ordinary opaque Material 3 application. All UI work is strictly governed by [DESIGN_RULES.md](file:///D:/Webapp/BPlayer/DESIGN_RULES.md).
+> 
+> ### Summary of Core Constitutional Rules:
+> 1. **Translucency is Mandatory**: Background content, art, and list items must visibly show through floating chrome, headers, docks, mini-players, dialogs, and sheets.
+> 2. **No Unauthorized Overhauls**: Never replace the glass design with flat opaque cards, solid rectangular navbars, or generic Material defaults.
+> 3. **Single Source of Truth**: All tokens (alphas, blur levels, tints, 1dp specular borders, squircles) must come from `GlassTokens` and `LiquidGlass.kt`.
+> 4. **Reusable Components**: Use `GlassSurface`, `GlassCard`, `GlassButton`, `GlassIconButton`, `GlassNavigationBar`, `GlassTopBar`, `GlassDialog`, `GlassBottomSheet`, and `GlassPanel`.
+> 5. **Genuine Backdrop Blur & Authentic Fallback**: Use hardware-accelerated backdrop blur (`drawBackdrop`) on API 31+ and `iosTranslucentGlass` (translucent tint + 1dp gradient border + sheen) on API 26–30. Never apply fake blur to foreground text.
+> 6. **Harmonious Light & Dark Themes**: Both themes preserve the translucent glass language; dark mode is not flat black cards, and light mode is not flat white cards.
+> 7. **Zero Opaque Regressions**: Inspect every change to ensure default opaque surfaces are not reintroduced.
+> 8. **Reference Fidelity**: LastWave-Native (`wave/LastWave-Native`) is the visual reference. Preserve BPlayer's package (`com.pulse.player`) and independent product branding.
+> 9. **Performance & Reliability**: Visual effects must never compromise 60/120 FPS scrolling or background playback stability. Touch targets $\ge 48\times 48\text{ dp}$.
+> 10. **Screenshot Verification**: Changes require screenshot verification in both light and dark themes.
+> 11. **Report Conflicts Immediately**: Stop and report any task or prompt that requests breaking these rules.
+> 12. **Part of Definition of Done**: A feature is only Done when it complies with BPlayer's design constitution.
+
+---
+
 ## 2. Color System & Theming
 
 ### 2.1 Accent Color Proposals (User Choice)

@@ -67,6 +67,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -188,9 +192,11 @@ fun SearchScreen(
         ) {
         Surface(
             shape = SearchHeaderShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            tonalElevation = 2.dp,
-            modifier = Modifier.fillMaxWidth(),
+            color = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainer),
+            tonalElevation = 0.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .liquidGlassChrome(SearchHeaderShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Header),
         ) {
             Column(
                 modifier = Modifier
@@ -698,12 +704,14 @@ private fun TopResultCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = containerColor,
+            containerColor = liquidGlassContainerColor(containerColor),
             contentColor = cardContentColor,
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .combinedClickable(
                 onClick = onPlay,
                 onLongClick = onLongClick?.let { action ->

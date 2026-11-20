@@ -6,7 +6,18 @@ This document outlines mandatory directives, coding standards, architectural gua
 
 ## 1. Core Principles
 
-1. **Top Priority 1 — Exquisite Visual Design**: UI chrome must stay quiet and refined. Content (album artwork, artist imagery) is the visual hero.
+1. **Top Priority 1 — LASTWAVE VISUAL FIDELITY RULE & Permanent Design Lock**:
+   - **LastWave-Native is the authoritative visual reference for BPlayer.** Future developers and coding agents must not independently redesign, simplify, flatten, recolor, replace or remove the established visual design.
+   - **The existing BPlayer feature set must be preserved while the reference design is reproduced.**
+   - Any proposed visual change must:
+     1. Be compared against LastWave side-by-side (`qa/SIDE_BY_SIDE_DESIGN_COMPARISON.md`).
+     2. Be documented.
+     3. Be checked for impact on existing features.
+     4. Receive explicit user approval before implementation if it changes the established design direction.
+   - Do not silently replace translucent surfaces with opaque surfaces.
+   - Do not introduce a new design system.
+   - Do not introduce new colors, typography, component styles or animations that conflict with the reference.
+   - All UI work is strictly governed by [DESIGN_RULES.md](file:///D:/Webapp/BPlayer/DESIGN_RULES.md).
 2. **Top Priority 2 — Frictionless UX**: Every interaction must feel snappy, intuitive, and responsive. One-hand friendly design (interactive zones in the bottom 40%).
 3. **Playback Reliability is Non-Negotiable**: Background audio playback must survive screen locks, aggressive OEM process management, audio focus changes, and configuration changes. The UI must never directly control ExoPlayer; it talks exclusively to `MediaController`.
 
@@ -93,7 +104,8 @@ This document outlines mandatory directives, coding standards, architectural gua
 A milestone or feature is considered **Done** only when:
 1. **Compilation**: Code compiles cleanly with zero unresolved warnings or deprecations introduced.
 2. **Architecture**: Adheres strictly to MVVM + UDF + Hilt + Media3. No UI leakage into the playback engine.
-3. **Error Handling**: All edge cases (corrupted files, missing tags, network timeouts, denied permissions) are handled gracefully with friendly UI states and recorded in `AppLogger`.
-4. **Performance**: List scrolling maintains 60/120 FPS with 10,000+ tracks; app cold start completes in < 1.5 seconds.
-5. **Testing**: Unit tests are added for core business logic (Smart Previous tap detector, LRC synchronizer, queue manager, search filter).
-6. **Documentation**: Milestone checkboxes in `docs/TASKS.md` are updated, and significant architectural deviations are logged in `docs/DECISIONS.md`.
+3. **Design Preservation**: Strictly follows [DESIGN_RULES.md](file:///D:/Webapp/BPlayer/DESIGN_RULES.md). Translucency, 1dp specular borders, and glass components are preserved with zero opaque surface regressions in both light and dark themes.
+4. **Error Handling**: All edge cases (corrupted files, missing tags, network timeouts, denied permissions) are handled gracefully with friendly UI states and recorded in `AppLogger`.
+5. **Performance**: List scrolling maintains 60/120 FPS with 10,000+ tracks; app cold start completes in < 1.5 seconds.
+6. **Testing**: Unit tests are added for core business logic (Smart Previous tap detector, LRC synchronizer, queue manager, search filter).
+7. **Documentation**: Milestone checkboxes in `docs/TASKS.md` are updated, and significant architectural deviations are logged in `docs/DECISIONS.md`.

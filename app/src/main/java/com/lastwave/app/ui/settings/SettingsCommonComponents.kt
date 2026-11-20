@@ -214,6 +214,9 @@ import com.lastwave.app.data.local.AppLanguage
 import com.lastwave.app.data.local.nativeDisplayName
 import com.lastwave.app.data.lyrics.TRANSLATION_LANGUAGES
 import com.lastwave.app.data.lyrics.translationLanguageName
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -398,11 +401,14 @@ internal fun SettingsToggleCard(
         onCheckedChange(value)
     }
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
+
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f),
+            containerColor = cardContainer,
+            disabledContainerColor = cardContainer.copy(alpha = 0.5f),
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
@@ -412,6 +418,7 @@ internal fun SettingsToggleCard(
                 scaleX = s
                 scaleY = s
             }
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape)
             .clip(shape)
             .combinedClickable(
@@ -495,11 +502,14 @@ internal fun SettingsToggleCard(
         onCheckedChange(value)
     }
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
+
     Card(
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f),
+            containerColor = cardContainer,
+            disabledContainerColor = cardContainer.copy(alpha = 0.5f),
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
@@ -509,6 +519,7 @@ internal fun SettingsToggleCard(
                 scaleX = s
                 scaleY = s
             }
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape)
             .clip(shape)
             .combinedClickable(
@@ -585,11 +596,14 @@ internal fun SettingsActionCard(
     val titleColor = if (danger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
     val shape = groupShape(position)
 
+    val baseContainer = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+    val cardContainer = liquidGlassContainerColor(baseContainer)
+
     Card(
         onClick = onClick,
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = cardContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         interactionSource = interactionSource,
@@ -599,6 +613,7 @@ internal fun SettingsActionCard(
                 scaleX = scale
                 scaleY = scale
             }
+            .liquidGlassChrome(shape, preset = LiquidGlassPreset.Card)
             .settingHighlightGlow(isHighlighted = isHighlighted, shape = shape),
     ) {
         Row(

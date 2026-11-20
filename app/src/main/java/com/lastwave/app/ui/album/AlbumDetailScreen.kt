@@ -48,6 +48,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -537,10 +541,15 @@ fun AlbumDetailScreen(
                     // 4. Description / Wiki Card
                     if (!data.description.isNullOrBlank()) {
                         item(key = "album_description") {
+                            val descShape = RoundedCornerShape(20.dp)
                             Card(
-                                shape = RoundedCornerShape(20.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                                shape = descShape,
+                                colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                                    .liquidGlassChrome(shape = descShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
                             ) {
                                 Column(Modifier.padding(16.dp)) {
                                     Text(
@@ -720,11 +729,15 @@ private fun AlbumCard(
     item: ArtistAlbumItem,
     onClick: () -> Unit,
 ) {
+    val cardShape = RoundedCornerShape(20.dp)
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        modifier = Modifier.width(150.dp),
+        shape = cardShape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerLow)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier
+            .width(150.dp)
+            .liquidGlassChrome(shape = cardShape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card),
     ) {
         Column(Modifier.padding(10.dp)) {
             Box(

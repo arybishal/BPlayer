@@ -63,6 +63,10 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MusicNote
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -188,12 +192,14 @@ internal fun PlaylistCard(
         label = "cardBg",
     )
 
+    val shape = com.lastwave.app.ui.common.groupShape(position)
     Card(
-        shape = com.lastwave.app.ui.common.groupShape(position),
-        colors = CardDefaults.cardColors(containerColor = cardBackground),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(cardBackground)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
@@ -391,12 +397,14 @@ internal fun DownloadsHeroCard(
     )
     val contentColor = MaterialTheme.colorScheme.onTertiaryContainer
 
+    val shape = RoundedCornerShape(GroupOuterRadius)
     Card(
-        shape = RoundedCornerShape(GroupOuterRadius),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.tertiaryContainer)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
@@ -515,12 +523,14 @@ internal fun LocalSongsHeroCard(
         MaterialTheme.colorScheme.onSecondaryContainer
     }
 
+    val shape = RoundedCornerShape(GroupOuterRadius)
     Card(
-        shape = RoundedCornerShape(GroupOuterRadius),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(containerColor)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
@@ -682,12 +692,14 @@ internal fun SpotifyPlaylistCard(
         label = "spCardScale",
     )
 
+    val shape = com.lastwave.app.ui.common.groupShape(position)
     Card(
-        shape = com.lastwave.app.ui.common.groupShape(position),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = liquidGlassContainerColor(MaterialTheme.colorScheme.surfaceContainerHigh)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .liquidGlassChrome(shape = shape, enabled = LocalLiquidGlass.current, preset = LiquidGlassPreset.Card)
             .graphicsLayer {
                 scaleX = cardScale
                 scaleY = cardScale
