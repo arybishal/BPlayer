@@ -180,4 +180,34 @@ Transforming the audio player into BPlayer required integrating high-end audio f
 3. **Last.fm Scrobbler**: Authenticated MD5 scrobbler with offline disk queuing, rate-limit backoff, and 50%/240s scrobble triggers.
 4. **Android Auto**: Upgraded `PlaybackService` to `MediaLibraryService` with reactive `MediaLibrarySession` browse tree.
 
+---
+
+## ADR 013: User-Selectable Offline Download Formats & Native Transcoding Engine
+
+### Context
+Users requested flexible offline audio format options (OPUS, MP3, AAC/M4A, FLAC, Original) to accommodate diverse playback environments including older car stereos, home theater systems, and legacy hardware media players. However, Android's AOSP framework does not provide a native MP3 encoder, and naively changing file extensions would create corrupt/unplayable files. Furthermore, transcoding must never compromise stability, block UI threads, or mislead users about acoustic fidelity.
+
+### Decision
+1. **Canonical Format Preferences**:
+   - Stored in DataStore: `bplayer_download_audio_format` (default: OPUS) and `bplayer_download_conversion_quality` (default: HIGH).
+   - Formats supported: OPUS, MP3, AAC/M4A, FLAC, Original source format.
+   - Presets supported: Standard, High, Maximum.
+2. **Direct Stream Streamlining**:
+   - When the user selects AAC/M4A and a native AAC stream (such as YouTube itag 140) is available, BPlayer downloads it directly, avoiding lossy re-encoding and saving CPU cycles.
+3. **Headless ExoPlayer PCM Decoder**:
+   - Input audio is decoded to standard 16-bit Linear PCM in a headless ExoPlayer pipeline with `CapturingAudioSink`.
+4. **Native Shine MP3 Encoder & Soxr Resampler**:
+   - Compiled lightweight ANSI C Shine MP3 encoder (LGPL-2.0) with Soxr resampler inside `liblastwave_audio.so` across all 4 target ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`).
+   - Android `MediaCodec` encodes AAC (`audio/mp4a-latm` via `MediaMuxer`) and FLAC (`audio/flac`).
+5. **Non-Destructive Execution**:
+   - Changing download format settings affects only NEW downloads.
+   - Atomic temporary file generation prevents corrupted or incomplete files from entering the library.
+6. **Honest Quality Communications**:
+   - UI dialogs prominently note that transcoding from lossy streams does not recover discarded audio fidelity.
+
+### Consequences & Tradeoffs
+- **Positive**: Universal compatibility across car stereos and legacy devices; genuine encoding with zero dummy file renaming; zero external app dependencies; 100% test coverage.
+- **Negative**: Transcoding lossy to lossy formats takes additional CPU time and battery during download completion.
+
+
 

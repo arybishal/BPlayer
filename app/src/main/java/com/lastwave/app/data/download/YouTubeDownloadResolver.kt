@@ -12,6 +12,7 @@ import java.io.IOException
 internal suspend fun InnerTubeMusicApi.resolveDownloadCandidate(
     videoId: String,
     rejectedStreams: Set<String>,
+    preferM4a: Boolean = false,
     remainingBudgetMs: () -> Long,
 ): YouTubeAudioStream {
     var lastError: Exception? = null
@@ -29,6 +30,13 @@ internal suspend fun InnerTubeMusicApi.resolveDownloadCandidate(
             else -> error
         }
         null
+    }
+
+    if (preferM4a) {
+        val m4aDirect = attempt { streamExtractor.resolveAudioStream(videoId, preferM4a = true) }
+        val m4aCandidates = listOfNotNull(m4aDirect, attempt { resolveAudioStream(videoId) })
+        val m4aChosen = m4aCandidates.firstOrNull { !wasRejected(it) } ?: m4aCandidates.firstOrNull()
+        if (m4aChosen != null) return m4aChosen
     }
 
     val playback = attempt {

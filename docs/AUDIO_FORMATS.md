@@ -140,3 +140,72 @@ Pulse inspects extracted file headers and displays visual badges in the Track Ro
 | **DSD** | DSD64, DSD128, DSD256 (`.dsf` / `.dff`) | Accent Filled Pill |
 | **LOSSLESS** | ALAC, WAV, APE, WavPack | Outline Pill |
 | **STANDARD** | MP3, AAC, OGG (< 320 kbps) | Muted Caption |
+
+---
+
+## 7. User-Selectable Offline Download Formats & Transcoding Engine
+
+BPlayer enables users to configure their preferred audio format for all future offline downloads via:
+`Settings → Audio & Playback → Offline audio format` or `Library → Downloads → Options → Offline audio format`.
+
+### 7.1 Supported Offline Download Formats
+
+| Format | Extension | Default Container | Transcoding Engine | Use Case & Fidelity |
+|---|---|---|---|---|
+| **OPUS** *(Default)* | `.opus` | Ogg / WebM Opus | Direct stream remuxing (`WebmOpusRemuxer`) | Pristine original stream fidelity from streaming sources; minimal storage footprint (~2.5 MB / song). |
+| **MP3** | `.mp3` | MPEG-1 Audio Layer III | Native Shine C Engine (`liblastwave_audio.so`) | Universal compatibility with older car stereos, legacy MP3 players, and USB DACs. Genuine CBR/VBR encoding. |
+| **AAC / M4A** | `.m4a` | MPEG-4 ISO container | Direct itag 140 stream OR `MediaCodec` + `MediaMuxer` | High-quality Apple / AAC standard. When available, downloaded directly without re-encoding; otherwise hardware-encoded. |
+| **FLAC** | `.flac` | Native FLAC | Android `MediaCodec` (`audio/flac`) | Lossless audio container. Transcoded from decoded linear PCM. |
+| **Original** | Matches source | Source container (`.opus`, `.m4a`, etc.) | Direct Bitstream Preservation | Zero transcoding or remuxing; stores the exact byte stream delivered by the media source. |
+
+### 7.2 Quality Presets & Bitrate Mapping
+
+BPlayer implements three transparent conversion presets without misleading claims of restoring lost fidelity:
+
+| Quality Preset | MP3 Target | AAC / M4A Target | OPUS Target | FLAC Target | Fidelity Note |
+|---|---|---|---|---|---|
+| **Standard** | 128 kbps | 128 kbps | 96 kbps | 16-bit / 44.1 kHz | Maximum storage savings; ideal for constrained device storage. |
+| **High** | 192 kbps | 192 kbps | 128 kbps | 16-bit / 44.1 kHz | Balanced sweet spot for everyday listening. |
+| **Maximum** | 320 kbps | 256 kbps | 160 kbps | 16-bit / 44.1 kHz | Maximum possible fidelity permitted by codec specifications. |
+
+> [!NOTE]
+> **Fidelity Transparency**: Transcoding from lossy streaming sources (e.g. YouTube Opus or AAC) into MP3 or FLAC does not restore ultrasonic frequencies or compression artifacts previously discarded by lossy encoders. BPlayer clearly communicates this in all UI dialogs.
+
+### 7.3 Multi-Stage Background Conversion Pipeline
+
+```
+[Media Source Discovery]
+          │
+          ▼
+[Direct Stream Matching] ──(User requested AAC & itag 140 available)──► [Direct M4A Stream Download]
+          │                                                                           │
+   (Format mismatch)                                                                  │
+          ▼                                                                           │
+[Download to Temp File (.tmp)]                                                        │
+          │                                                                           │
+          ▼                                                                           │
+[Headless ExoPlayer PCM Decoder] ──► [Linear PCM 16-bit Buffer]                       │
+                                                    │                                 │
+                   ┌────────────────────────────────┼─────────────────┐               │
+                   ▼                                ▼                 ▼               │
+          [Native Shine MP3]              [MediaCodec AAC]    [MediaCodec FLAC]       │
+                   │                                │                 │               │
+                   └────────────────────────────────┴─────────────────┘               │
+                                           │                                          │
+                                           ▼                                          │
+                           [Temporary Output Validation] ◄────────────────────────────┘
+                                           │
+                                           ▼
+                           [Metadata & Artwork Tagging] (JAudioTagger)
+                                           │
+                                           ▼
+                           [Atomic File Publication] (Rename to Music/BPlayer/)
+                                           │
+                                           ▼
+                           [Room DB & MediaStore Indexing]
+```
+
+### 7.4 Non-Destructive Preference Changes
+- Changing the download format setting strictly affects **future** downloads.
+- Existing downloaded files, playlists, favorite markings, and play statistics are preserved and remain 100% playable.
+

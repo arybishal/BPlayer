@@ -109,6 +109,7 @@ class AudioRestoreScanTest {
             moduleManager = mockk(relaxed = true),
             flacTranscoder = mockk(relaxed = true),
             losslessMusicApi = mockk(relaxed = true),
+            audioFormatConverter = mockk(relaxed = true),
         )
     }
 

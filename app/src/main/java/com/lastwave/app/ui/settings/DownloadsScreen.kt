@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -179,6 +180,10 @@ fun DownloadsScreen(
     var showFolderDialog by remember { mutableStateOf(false) }
     var showOrganizationDialog by remember { mutableStateOf(false) }
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showFormatDialog by remember { mutableStateOf(false) }
+
+    val downloadAudioFormat by viewModel.downloadAudioFormat.collectAsStateWithLifecycle()
+    val downloadConversionQuality by viewModel.downloadConversionQuality.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val downloadTreeUri by viewModel.downloadTreeUri.collectAsStateWithLifecycle()
@@ -364,6 +369,23 @@ fun DownloadsScreen(
                                 onClick = {
                                     showOptionsMenu = false
                                     viewModel.openInFileManager()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Column {
+                                        Text("Offline audio format")
+                                        Text(
+                                            "${downloadAudioFormat.displayName} (${downloadConversionQuality.displayName})",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                },
+                                leadingIcon = { Icon(Icons.Filled.Tune, contentDescription = null) },
+                                onClick = {
+                                    showOptionsMenu = false
+                                    showFormatDialog = true
                                 },
                             )
                             DropdownMenuItem(
@@ -817,6 +839,16 @@ fun DownloadsScreen(
             onStructureChange = { viewModel.setDownloadStructure(it) },
             onUseAlbumArtistChange = { viewModel.setUseAlbumArtistForFolders(it) },
             onPrimaryOnlyChange = { viewModel.setPrimaryArtistOnly(it) },
+        )
+    }
+
+    if (showFormatDialog) {
+        DownloadAudioFormatDialog(
+            currentFormat = downloadAudioFormat,
+            currentQuality = downloadConversionQuality,
+            onFormatChange = { viewModel.setDownloadAudioFormat(it) },
+            onQualityChange = { viewModel.setDownloadConversionQuality(it) },
+            onDismiss = { showFormatDialog = false },
         )
     }
 }

@@ -38,6 +38,13 @@ Designed with a relentless focus on audiophile-grade playback fidelity, fluid ph
 - **Bit-Perfect USB DAC Output**: Direct USB host audio streaming bypassing Android audio flinger mixer resamplers for external USB DACs.
 - **16KB Page Alignment**: Fully compliant with Android 15+ 16KB memory page sizes on native C++ libraries (`liblastwave_audio.so`, `libdecent_usb_audio.so`).
 
+### 💾 User-Selectable Offline Music Download Formats
+- **5 Configurable Download Formats**: OPUS (Default), MP3, AAC / M4A, FLAC, and Original source format.
+- **Genuine Native Transcoding Pipeline**: Headless ExoPlayer 16-bit linear PCM decoding with native ANSI C Shine MP3 encoder (`liblastwave_audio.so`), Soxr high-res resampler, and Android `MediaCodec` AAC & FLAC encoders.
+- **Smart Stream Optimization**: Directly downloads itag 140 (AAC) when AAC/M4A is requested, avoiding redundant lossy transcoding.
+- **Quality Presets**: Standard (128 kbps), High (192 kbps), Maximum (320 kbps MP3 / bit-exact FLAC).
+- **Non-Destructive Integrity**: Affects future downloads only; existing offline files, playlists, and favorites remain untouched.
+
 ### 🎨 Modern Liquid Glass Design (Strictly NO Blue Gradients)
 - **Zero Oval / Bubble Artifacts**: Refined Material 3 Bottom Sheets and sleek rounded cards (`14.dp` to `24.dp`).
 - **Warm & Organic Foundation**: Warm neutral charcoals (`#121214`), soft warm daylight creams (`#F9F9FB`), and true pitch-black AMOLED (`#000000`).

@@ -237,3 +237,31 @@ Triggered via track row overflow (`more_vert`) or long-press:
 - **Acceptance Criteria**:
   - [ ] Force-induced runtime exception appears in the Logs screen upon subsequent app launch.
   - [ ] Exported `.txt` contains device model, OS version, app version, timestamp, and formatted trace.
+
+---
+
+## 9. User-Selectable Offline Audio Download Formats
+
+### 9.1 Overview & Architecture
+- **Description**: Empowers users to configure their preferred offline download audio format and conversion quality. Enables universal playback across older car audio systems, legacy media players, and specialized DACs.
+- **Access Points**:
+  - `Settings → Audio & Playback → Offline audio format`
+  - `Library → Downloads → Options (3-dots) → Offline audio format`
+
+### 9.2 Supported Audio Formats
+1. **OPUS (Default)**: Native streaming container (.opus). Highest fidelity per bit directly from modern streaming backends. Minimal storage footprint (~2.5 MB/track).
+2. **MP3**: Universal MPEG-1 Audio Layer III (.mp3). Decoded via headless ExoPlayer and encoded via native Shine C engine (`liblastwave_audio.so`) with Soxr resampler.
+3. **AAC / M4A**: Apple / MPEG-4 standard (.m4a). Streamed directly via itag 140 when available from YouTube without transcoding; otherwise hardware-encoded via Android `MediaCodec` + `MediaMuxer`.
+4. **FLAC**: Lossless container (.flac) encoded via Android `MediaCodec`.
+5. **Original Source Format**: Direct bitstream preservation without any container or codec conversion.
+
+### 9.3 Conversion Quality Presets
+- **Standard**: 128 kbps MP3/AAC, 96 kbps Opus. Designed for low storage footprint.
+- **High (Default)**: 192 kbps MP3/AAC, 128 kbps Opus. Balanced high-fidelity setting.
+- **Maximum**: 320 kbps MP3, 256 kbps AAC, 160 kbps Opus, FLAC bit-exact.
+
+### 9.4 Non-Destructive Integrity & Guardrails
+- **Future Downloads Only**: Changing preferences never touches or alters existing offline files or metadata.
+- **Atomic Operations**: Downloads are written to `.tmp`, converted to `.tmp`, verified, tagged via JAudioTagger, and atomically renamed to `Music/BPlayer/`.
+- **Honest Communications**: All dialogs clearly state that transcoding from lossy streams cannot restore discarded acoustic frequencies.
+

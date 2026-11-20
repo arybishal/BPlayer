@@ -222,6 +222,10 @@ data class MiscSettings(
      *  translation service expects ("fr", "ja", "zh-TW"…). Blank = follow the
      *  app language. */
     val translationLanguage: String = "",
+    /** User-selectable offline audio format: OPUS, MP3, AAC_M4A, FLAC, ORIGINAL */
+    val downloadAudioFormat: com.lastwave.app.data.download.DownloadAudioFormat = com.lastwave.app.data.download.DownloadAudioFormat.OPUS,
+    /** Conversion quality preset: Standard, High, Maximum */
+    val downloadConversionQuality: com.lastwave.app.data.download.ConversionQuality = com.lastwave.app.data.download.ConversionQuality.HIGH,
     /** When true (default), downloads fetch and save synced lyrics (.lrc companion files and embedded tags). */
     val downloadLyrics: Boolean = true,
     /** Stable ids for the last sort selected on each Downloads tab. */
@@ -397,8 +401,8 @@ enum class DownloadFolderStructure(val id: String, val titleRes: Int, val exampl
     }
 }
 
-/** Default subfolder under Music/ for offline tracks (Music/LastWave). */
-const val DEFAULT_DOWNLOAD_FOLDER = "LastWave"
+/** Default subfolder under Music/ for offline tracks (Music/BPlayer). */
+const val DEFAULT_DOWNLOAD_FOLDER = "BPlayer"
 
 /** Sanitize a user-entered download folder to a safe single path segment:
  *  no separators, no traversal, max 40 chars, fallback to default. */
@@ -465,6 +469,8 @@ class SettingsPreferences @Inject constructor(
         val KEEP_LYRICS_SCREEN_AWAKE = booleanPreferencesKey("lw_keep_lyrics_screen_awake")
         val LYRICS_BUTTONS_AUTO_HIDE_SECONDS = intPreferencesKey("lw_lyrics_buttons_auto_hide_seconds")
         val TRANSLATION_LANGUAGE = stringPreferencesKey("lw_translation_language")
+        val DOWNLOAD_AUDIO_FORMAT = stringPreferencesKey("bplayer_download_audio_format")
+        val DOWNLOAD_CONVERSION_QUALITY = stringPreferencesKey("bplayer_download_conversion_quality")
         val DOWNLOAD_LYRICS = booleanPreferencesKey("lw_download_lyrics")
         val DOWNLOAD_SONG_SORT = stringPreferencesKey("lw_download_song_sort")
         val DOWNLOAD_ARTIST_SORT = stringPreferencesKey("lw_download_artist_sort")
@@ -583,6 +589,8 @@ class SettingsPreferences @Inject constructor(
                 lyricsButtonsAutoHideSeconds =
                     sanitizeLyricsButtonsAutoHideSeconds(p.readSafely(Keys.LYRICS_BUTTONS_AUTO_HIDE_SECONDS)),
                 translationLanguage = p.readSafely(Keys.TRANSLATION_LANGUAGE)?.trim().orEmpty(),
+                downloadAudioFormat = com.lastwave.app.data.download.DownloadAudioFormat.fromId(p.readSafely(Keys.DOWNLOAD_AUDIO_FORMAT)),
+                downloadConversionQuality = com.lastwave.app.data.download.ConversionQuality.fromId(p.readSafely(Keys.DOWNLOAD_CONVERSION_QUALITY)),
                 downloadLyrics = p.readSafely(Keys.DOWNLOAD_LYRICS) ?: true,
                 downloadSongSort = p.readSafely(Keys.DOWNLOAD_SONG_SORT) ?: "recent",
                 downloadArtistSort = p.readSafely(Keys.DOWNLOAD_ARTIST_SORT) ?: "name_az",
@@ -1035,6 +1043,14 @@ class SettingsPreferences @Inject constructor(
 
     suspend fun setTranslationLanguage(language: String) {
         dataStore.edit { it[Keys.TRANSLATION_LANGUAGE] = language.trim() }
+    }
+
+    suspend fun setDownloadAudioFormat(format: com.lastwave.app.data.download.DownloadAudioFormat) {
+        dataStore.edit { it[Keys.DOWNLOAD_AUDIO_FORMAT] = format.id }
+    }
+
+    suspend fun setDownloadConversionQuality(quality: com.lastwave.app.data.download.ConversionQuality) {
+        dataStore.edit { it[Keys.DOWNLOAD_CONVERSION_QUALITY] = quality.id }
     }
 
     suspend fun setDownloadLyrics(enabled: Boolean) {

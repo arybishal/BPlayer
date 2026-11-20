@@ -58,12 +58,23 @@ add_library(
     automix/LinkwitzRileyCrossover.cpp
     automix/TransientPreservingStretcher.cpp
     automix/LufsContourNormalizer.cpp
+    shine/bitstream.c
+    shine/huffman.c
+    shine/l3bitstream.c
+    shine/l3loop.c
+    shine/l3mdct.c
+    shine/l3subband.c
+    shine/layer3.c
+    shine/reservoir.c
+    shine/tables.c
+    shine/ShineMp3Bridge.cpp
 )
 
 target_include_directories(
     lastwave_audio
     PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shine"
     "${soxr_source_SOURCE_DIR}/src"
 )
 

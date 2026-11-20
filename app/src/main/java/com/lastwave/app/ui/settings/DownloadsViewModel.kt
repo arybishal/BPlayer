@@ -279,6 +279,38 @@ class DownloadsViewModel @Inject constructor(
                 AlbumSortOption.TITLE_AZ,
             )
 
+    val downloadAudioFormat: StateFlow<com.lastwave.app.data.download.DownloadAudioFormat> =
+        settingsPreferences.settings
+            .map { it.downloadAudioFormat }
+            .withDownloadsFallback(com.lastwave.app.data.download.DownloadAudioFormat.OPUS)
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                com.lastwave.app.data.download.DownloadAudioFormat.OPUS,
+            )
+
+    val downloadConversionQuality: StateFlow<com.lastwave.app.data.download.ConversionQuality> =
+        settingsPreferences.settings
+            .map { it.downloadConversionQuality }
+            .withDownloadsFallback(com.lastwave.app.data.download.ConversionQuality.HIGH)
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                com.lastwave.app.data.download.ConversionQuality.HIGH,
+            )
+
+    fun setDownloadAudioFormat(format: com.lastwave.app.data.download.DownloadAudioFormat) {
+        launchDownloadAction("update download audio format") {
+            settingsPreferences.setDownloadAudioFormat(format)
+        }
+    }
+
+    fun setDownloadConversionQuality(quality: com.lastwave.app.data.download.ConversionQuality) {
+        launchDownloadAction("update download conversion quality") {
+            settingsPreferences.setDownloadConversionQuality(quality)
+        }
+    }
+
     val downloadFolder: StateFlow<String> =
         settingsPreferences.settings
             .map { it.downloadFolder }

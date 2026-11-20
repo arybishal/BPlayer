@@ -532,6 +532,10 @@ class SettingsViewModel @Inject constructor(
     fun setWifiStreamingQuality(quality: Int) = launchSettingsAction("update Wi-Fi streaming quality") { settingsPreferences.setWifiStreamingQuality(quality) }
     fun setCellularStreamingQuality(quality: Int) = launchSettingsAction("update cellular streaming quality") { settingsPreferences.setCellularStreamingQuality(quality) }
     fun setDownloadQuality(quality: Int) = launchSettingsAction("update download quality") { settingsPreferences.setDownloadQuality(quality) }
+    fun setDownloadAudioFormat(format: com.lastwave.app.data.download.DownloadAudioFormat) =
+        launchSettingsAction("update download audio format") { settingsPreferences.setDownloadAudioFormat(format) }
+    fun setDownloadConversionQuality(quality: com.lastwave.app.data.download.ConversionQuality) =
+        launchSettingsAction("update download conversion quality") { settingsPreferences.setDownloadConversionQuality(quality) }
     fun setStudioMasterClarity(enabled: Boolean) {
         // Apply immediately; DataStore persists the same state for future engine instances.
         launchSettingsAction("update Studio Master Clarity") {

@@ -429,6 +429,7 @@ fun SettingsScreen(
     var showQualityDialog by remember { mutableStateOf(false) }
     var editingCellularQuality by remember { mutableStateOf(false) }
     var showDownloadQualityDialog by remember { mutableStateOf(false) }
+    var showDownloadFormatDialog by remember { mutableStateOf(false) }
     var showHiResStartDialog by remember { mutableStateOf(false) }
     var showEqSheet by remember { mutableStateOf(false) }
     var showAutoEq by remember { mutableStateOf(false) }
@@ -833,6 +834,18 @@ fun SettingsScreen(
                                 onClick = { showDownloadQualityDialog = true },
                                 position = position,
                                 isHighlighted = (highlightedSettingId == "audio.download_quality"),
+                            )
+                        }
+                        add { position ->
+                            SettingsActionCard(
+                                icon = Icons.Filled.Tune,
+                                iconContainer = MaterialTheme.colorScheme.secondaryContainer,
+                                iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                title = "Offline audio format",
+                                subtitle = "${misc.downloadAudioFormat.displayName} (${misc.downloadConversionQuality.displayName}) \u2022 Future downloads",
+                                onClick = { showDownloadFormatDialog = true },
+                                position = position,
+                                isHighlighted = (highlightedSettingId == "audio.download_audio_format"),
                             )
                         }
                         add { position ->
@@ -2942,6 +2955,16 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = { showHiResStartDialog = false }) { Text(stringResource(R.string.common_done)) }
             },
+        )
+    }
+
+    if (showDownloadFormatDialog) {
+        DownloadAudioFormatDialog(
+            currentFormat = misc.downloadAudioFormat,
+            currentQuality = misc.downloadConversionQuality,
+            onFormatChange = viewModel::setDownloadAudioFormat,
+            onQualityChange = viewModel::setDownloadConversionQuality,
+            onDismiss = { showDownloadFormatDialog = false },
         )
     }
 

@@ -153,6 +153,23 @@ object SettingsSearchIndex {
             )
             add(
                 SettingsEntry(
+                    id = "audio.download_audio_format",
+                    title = "Offline audio format",
+                    subtitle = "OPUS, MP3, AAC / M4A, FLAC, or Original source format",
+                    keywords = listOf(
+                        "format", "audio format", "mp3", "opus", "aac", "m4a", "flac", "original",
+                        "download format", "codec", "encode", "transcode", "conversion quality"
+                    ),
+                    icon = Icons.Filled.Tune,
+                    iconContainer = { MaterialTheme.colorScheme.secondaryContainer },
+                    iconTint = { MaterialTheme.colorScheme.onSecondaryContainer },
+                    parentTab = SettingsTab.AUDIO,
+                    section = "Audio & Playback",
+                    type = EntryType.ACTION,
+                )
+            )
+            add(
+                SettingsEntry(
                     id = "audio.auto_upgrade_hi_res",
                     title = "Playback start",
                     subtitle = "Fast start, best quality first, or never upgrade",

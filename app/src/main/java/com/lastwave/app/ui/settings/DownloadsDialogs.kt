@@ -333,3 +333,153 @@ internal fun FolderOrganizationDialog(
         },
     )
 }
+
+@Composable
+fun DownloadAudioFormatDialog(
+    currentFormat: com.lastwave.app.data.download.DownloadAudioFormat,
+    currentQuality: com.lastwave.app.data.download.ConversionQuality,
+    onFormatChange: (com.lastwave.app.data.download.DownloadAudioFormat) -> Unit,
+    onQualityChange: (com.lastwave.app.data.download.ConversionQuality) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(
+                    text = "Offline audio format",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "Applies to future downloads only",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                com.lastwave.app.data.download.DownloadAudioFormat.entries.forEach { format ->
+                    val selected = format == currentFormat
+                    Surface(
+                        onClick = { onFormatChange(format) },
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerLow,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            RadioButton(
+                                selected = selected,
+                                onClick = { onFormatChange(format) },
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Column(Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = format.displayName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    if (format == com.lastwave.app.data.download.DownloadAudioFormat.OPUS) {
+                                        Spacer(Modifier.width(6.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(6.dp),
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                        ) {
+                                            Text(
+                                                text = "Default",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = format.explanation,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (currentFormat != com.lastwave.app.data.download.DownloadAudioFormat.ORIGINAL) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Conversion quality",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = "Transcoding from lossy streams (YouTube/OPUS) does not restore original lost fidelity.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                    Spacer(Modifier.height(4.dp))
+
+                    com.lastwave.app.data.download.ConversionQuality.entries.forEach { quality ->
+                        val qSelected = quality == currentQuality
+                        Surface(
+                            onClick = { onQualityChange(quality) },
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (qSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surfaceContainerLow,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = qSelected,
+                                    onClick = { onQualityChange(quality) },
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        text = quality.displayName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (qSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                        color = if (qSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = quality.explanation,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(com.lastwave.app.R.string.common_done),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        },
+    )
+}

@@ -114,6 +114,7 @@ class TrackDownloadManager @Inject constructor(
     internal val moduleManager: ModuleManager,
     internal val flacTranscoder: ModuleFlacTranscoder,
     internal val losslessMusicApi: LosslessMusicApi,
+    internal val audioFormatConverter: AudioFormatConverter,
 ) {
     companion object {
         const val CHANNEL_ID = "lastwave_downloads"
@@ -124,7 +125,7 @@ class TrackDownloadManager @Inject constructor(
         const val EXTRA_DOWNLOAD_TITLE = "download_title"
         const val EXTRA_DOWNLOAD_ARTIST = "download_artist"
         const val EXTRA_NAVIGATE_TO = "navigate_to"
-        internal const val PUBLIC_DIR_NAME = "LastWave"
+        internal const val PUBLIC_DIR_NAME = "BPlayer"
         /** Legacy default kept for reading files downloaded before a custom folder was chosen. */
         internal const val LEGACY_PUBLIC_DIR_NAME = "LastWave"
         // 128 KB keeps per-connection buffers out of the large-object heap:
@@ -763,6 +764,8 @@ class TrackDownloadManager @Inject constructor(
                 // Honor the download-quality setting (Dolby Atmos / stereo tiers / YouTube).
                 // Do not force Dolby Atmos unless the user explicitly selected it as download quality.
                 val requestedDownloadQuality = misc.downloadQuality
+                val preferredFormat = misc.downloadAudioFormat
+                val conversionQuality = misc.downloadConversionQuality
                 val isYouTubeRequested = requestedDownloadQuality == LosslessMusicApi.QUALITY_YOUTUBE
 
                 // 1. Provider module (.lwp engine): progressive clear FLAC/MP3 or segmented DASH (Dolby Atmos / Tidal Hi-Res)
@@ -1312,7 +1315,11 @@ class TrackDownloadManager @Inject constructor(
                                         break
                                     }
                                     pickedStream = try {
-                                        innerTube.resolveDownloadCandidate(candidateId, rejectedYtStreams) {
+                                        innerTube.resolveDownloadCandidate(
+                                            candidateId,
+                                            rejectedYtStreams,
+                                            preferM4a = (preferredFormat == DownloadAudioFormat.AAC_M4A),
+                                        ) {
                                             ytResolveBudgetMs - (android.os.SystemClock.elapsedRealtime() - ytFallbackStartMs)
                                         }
                                     } catch (error: Exception) {
@@ -1677,6 +1684,52 @@ class TrackDownloadManager @Inject constructor(
                                 segBridge.audioBadge(transcodeDesc)
                             }
                             isLossless = true
+                        }
+                    }
+
+                    // 3c. User-Selected Offline Audio Format conversion
+                    if (audioFormatConverter.isConversionRequired(extension, preferredFormat)) {
+                        updateStage("Converting to ${preferredFormat.displayName}…", notify = true)
+                        updateProgress(
+                            DownloadProgress(
+                                key = key,
+                                title = title,
+                                artist = artist,
+                                progressPercent = 95,
+                                formatBadge = "Converting to ${preferredFormat.displayName}",
+                            ),
+                        )
+                        val convertedResult = try {
+                            audioFormatConverter.convert(
+                                sourceFile = currentAudioFile,
+                                sourceExtension = extension,
+                                targetFormat = preferredFormat,
+                                quality = conversionQuality,
+                                title = finalTitle,
+                                artist = finalArtist,
+                                album = resolvedAlbum,
+                            )
+                        } catch (cancellation: CancellationException) {
+                            throw cancellation
+                        } catch (convErr: Throwable) {
+                            android.util.Log.w(
+                                "TrackDownloadManager",
+                                "Offline conversion to ${preferredFormat.displayName} failed for $title by $artist: ${convErr.message}; preserving source",
+                                convErr,
+                            )
+                            null
+                        }
+
+                        if (convertedResult != null) {
+                            if (convertedResult.file != currentAudioFile) {
+                                runCatching { currentAudioFile.delete() }
+                                currentAudioFile = convertedResult.file
+                                tempDownloadFile = convertedResult.file
+                            }
+                            extension = convertedResult.extension
+                            mimeType = convertedResult.mimeType
+                            formatBadge = convertedResult.formatBadge
+                            isLossless = convertedResult.isLossless
                         }
                     }
 
