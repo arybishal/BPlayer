@@ -467,7 +467,7 @@ object SettingsSearchIndex {
                     title = "App Icon",
                     subtitle = "Choose your home screen & in-app logo",
                     keywords = listOf(
-                        "app icon", "logo", "desktop logo", "white logo", "black logo", "launcher", "icon", "theme"
+                        "app icon", "logo", "white logo", "black logo", "launcher", "icon", "theme"
                     ),
                     icon = Icons.Filled.Apps,
                     iconContainer = { MaterialTheme.colorScheme.primaryContainer },
@@ -1368,46 +1368,13 @@ object SettingsSearchIndex {
             )
             add(
                 SettingsEntry(
-                    id = "about.telegram_support",
-                    title = "Telegram Updates & Support",
-                    subtitle = "Join @clashprojects on Telegram for app news, beta builds, and support",
+                    id = "about.issues",
+                    title = "Bug Reports & Feedback",
+                    subtitle = "Report issues and request features on GitHub",
                     keywords = listOf(
-                        "telegram", "support", "community", "chat", "clashprojects", "help",
-                        "updates channel", "news"
+                        "github", "support", "community", "issues", "bugs", "help", "feedback"
                     ),
-                    icon = Icons.AutoMirrored.Filled.Send,
-                    iconContainer = { MaterialTheme.colorScheme.primaryContainer },
-                    iconTint = { MaterialTheme.colorScheme.onPrimaryContainer },
-                    parentTab = SettingsTab.ABOUT,
-                    section = "About & Community",
-                    type = EntryType.ACTION,
-                )
-            )
-            add(
-                SettingsEntry(
-                    id = "about.discord_support",
-                    title = "Discord Support",
-                    subtitle = "Join our Discord community server for support and feedback",
-                    keywords = listOf(
-                        "discord", "community", "chat", "support", "feedback", "server", "discussion"
-                    ),
-                    icon = Icons.Filled.Group,
-                    iconContainer = { MaterialTheme.colorScheme.tertiaryContainer },
-                    iconTint = { MaterialTheme.colorScheme.onTertiaryContainer },
-                    parentTab = SettingsTab.ABOUT,
-                    section = "About & Community",
-                    type = EntryType.ACTION,
-                )
-            )
-            add(
-                SettingsEntry(
-                    id = "about.more_apps",
-                    title = "More Apps from Clash Projects",
-                    subtitle = "Join @MaterialYouApp on Telegram to discover other applications",
-                    keywords = listOf(
-                        "more apps", "material you app", "other apps", "clash projects", "developer"
-                    ),
-                    icon = Icons.Filled.AutoAwesome,
+                    icon = Icons.Filled.Code,
                     iconContainer = { MaterialTheme.colorScheme.primaryContainer },
                     iconTint = { MaterialTheme.colorScheme.onPrimaryContainer },
                     parentTab = SettingsTab.ABOUT,
@@ -1453,29 +1420,12 @@ object SettingsSearchIndex {
                 SettingsEntry(
                     id = "about.source_code",
                     title = "Open Source Code",
-                    subtitle = "View repository at github.com/Clash-Projects/LastWave-native",
+                    subtitle = "View repository at github.com/arybishal/BPlayer",
                     keywords = listOf(
-                        "source code", "github", "open source", "repository", "gpl", "license",
+                        "source code", "github", "bplayer", "open source", "repository", "gpl", "license",
                         "contribute", "git"
                     ),
                     icon = Icons.Filled.Code,
-                    iconContainer = { MaterialTheme.colorScheme.secondaryContainer },
-                    iconTint = { MaterialTheme.colorScheme.onSecondaryContainer },
-                    parentTab = SettingsTab.ABOUT,
-                    section = "About & Community",
-                    type = EntryType.ACTION,
-                )
-            )
-            add(
-                SettingsEntry(
-                    id = "about.desktop_app",
-                    title = "Download Desktop App",
-                    subtitle = "View repository at github.com/Clash-Projects/LastWave-Desktop",
-                    keywords = listOf(
-                        "desktop", "pc", "windows", "mac", "linux", "electron", "github", "clash-projects",
-                        "download"
-                    ),
-                    icon = Icons.Filled.Download,
                     iconContainer = { MaterialTheme.colorScheme.secondaryContainer },
                     iconTint = { MaterialTheme.colorScheme.onSecondaryContainer },
                     parentTab = SettingsTab.ABOUT,

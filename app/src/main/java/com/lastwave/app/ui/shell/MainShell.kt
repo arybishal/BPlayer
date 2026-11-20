@@ -283,9 +283,7 @@ fun MainShell(
     var joinSupportDismissedThisSession by rememberSaveable { mutableStateOf(false) }
 
     val currentSettings = settings
-    val shouldShowJoinSupport = currentSettings != null &&
-        !currentSettings.hasDismissedJoinSupportPrompt &&
-        !joinSupportDismissedThisSession
+    val shouldShowJoinSupport = false
 
     if (shouldShowJoinSupport) {
         JoinSupportDialog(
@@ -977,13 +975,13 @@ private fun JoinSupportDialog(
 
                 Spacer(Modifier.height(2.dp))
 
-                // Telegram Channel: MaterialYouApp
+                // Official GitHub Issues
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .clickable {
-                            openMaterialYouChannel(context)
+                            openSupportUrl(context, "https://github.com/arybishal/BPlayer/issues")
                             onDismiss()
                         },
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.70f),
@@ -998,27 +996,27 @@ private fun JoinSupportDialog(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF24A1DE).copy(alpha = 0.18f),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.size(36.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Material You Channel",
-                                    tint = Color(0xFF24A1DE),
+                                    imageVector = Icons.Filled.AutoAwesome,
+                                    contentDescription = "Issue Tracker",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(18.dp),
                                 )
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Material You Apps",
+                                text = "BPlayer Issues & Bugs",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "t.me/MaterialYouApp",
+                                text = "Report bugs & request features",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1032,13 +1030,13 @@ private fun JoinSupportDialog(
                     }
                 }
 
-                // Telegram Support: ClashProjects
+                // Official Releases
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .clickable {
-                            openTelegramSupport(context)
+                            openSupportUrl(context, "https://github.com/arybishal/BPlayer/releases")
                             onDismiss()
                         },
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.70f),
@@ -1053,27 +1051,27 @@ private fun JoinSupportDialog(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF24A1DE).copy(alpha = 0.18f),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
                             modifier = Modifier.size(36.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Telegram Support",
-                                    tint = Color(0xFF24A1DE),
+                                    imageVector = Icons.Filled.CloudDownload,
+                                    contentDescription = "Releases",
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(18.dp),
                                 )
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "ClashProjects Support",
+                                text = "BPlayer Releases",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "@clashprojects on Telegram",
+                                text = "Changelogs and latest APKs",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1087,13 +1085,13 @@ private fun JoinSupportDialog(
                     }
                 }
 
-                // Discord Community
+                // Official Source Code
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .clickable {
-                            openDiscordSupport(context)
+                            openSupportUrl(context, "https://github.com/arybishal/BPlayer")
                             onDismiss()
                         },
                     color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.70f),
@@ -1108,27 +1106,27 @@ private fun JoinSupportDialog(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFF5865F2).copy(alpha = 0.18f),
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
                             modifier = Modifier.size(36.dp),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Filled.Group,
-                                    contentDescription = "Discord Support",
-                                    tint = Color(0xFF5865F2),
+                                    imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                                    contentDescription = "Source Code",
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
                                     modifier = Modifier.size(18.dp),
                                 )
                             }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "LastWave Discord",
+                                text = "Source Code",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Text(
-                                text = "Community & discussions",
+                                text = "github.com/arybishal/BPlayer",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1158,49 +1156,11 @@ private fun JoinSupportDialog(
     )
 }
 
-private fun openMaterialYouChannel(context: android.content.Context) {
-    val tgIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("tg://resolve?domain=MaterialYouApp")).apply {
-        setPackage("org.telegram.messenger")
+private fun openSupportUrl(context: android.content.Context, url: String) {
+    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
         addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    val genericTgIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("tg://resolve?domain=MaterialYouApp")).apply {
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val webIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/MaterialYouApp")).apply {
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val success = runCatching { context.startActivity(tgIntent); true }.getOrDefault(false) ||
-        runCatching { context.startActivity(genericTgIntent); true }.getOrDefault(false) ||
-        runCatching { context.startActivity(webIntent); true }.getOrDefault(false)
-    if (!success) {
-        android.widget.Toast.makeText(context, "No browser or Telegram app available", android.widget.Toast.LENGTH_SHORT).show()
-    }
-}
-
-private fun openTelegramSupport(context: android.content.Context) {
-    val tgIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("tg://resolve?domain=clashprojects")).apply {
-        setPackage("org.telegram.messenger")
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val genericTgIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("tg://resolve?domain=clashprojects")).apply {
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val webIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/clashprojects")).apply {
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val success = runCatching { context.startActivity(tgIntent); true }.getOrDefault(false) ||
-        runCatching { context.startActivity(genericTgIntent); true }.getOrDefault(false) ||
-        runCatching { context.startActivity(webIntent); true }.getOrDefault(false)
-    if (!success) {
-        android.widget.Toast.makeText(context, "No browser or Telegram app available", android.widget.Toast.LENGTH_SHORT).show()
-    }
-}
-
-private fun openDiscordSupport(context: android.content.Context) {
-    val discordIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://discord.gg/DmyM2p2fMe")).apply {
-        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    val success = runCatching { context.startActivity(discordIntent); true }.getOrDefault(false)
+    val success = runCatching { context.startActivity(intent); true }.getOrDefault(false)
     if (!success) {
         android.widget.Toast.makeText(context, "No browser available to open link", android.widget.Toast.LENGTH_SHORT).show()
     }

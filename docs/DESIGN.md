@@ -1,8 +1,8 @@
-# UI/UX Design System Specification — Pulse Music Player
+# UI/UX Design System Specification — BPlayer Music Player
 
 ## 1. Design Philosophy & Core Principles
 
-Pulse is built upon a philosophy of **calm, tactile minimalism and content celebration**. Where traditional media players clutter the screen with heavy frames, dense text badges, and flashy neon gradients, Pulse treats album artwork and musical typography as the solitary focal point.
+BPlayer is built upon a philosophy of **calm, tactile minimalism and content celebration**. Where traditional media players clutter the screen with heavy frames, dense text badges, and flashy neon gradients, BPlayer treats album artwork and musical typography as the solitary focal point.
 
 1. **Content First**: Album artwork is the hero element of the entire app. Interface chrome is quiet, translucent, and tonally harmonized with the current music.
 2. **Icon-First Transport**: Transport controls and high-frequency actions use unmistakable, geometric iconography (Material Symbols Rounded) without redundant text labels. Text labels are reserved for menus, search results, and settings.
@@ -93,7 +93,7 @@ The typographic system utilizes a bundled geometric sans-serif typeface: **Plus 
 - `32dp`: Hero element margins.
 
 ### 4.3 Elevation & Layering
-Rather than heavy cast shadows, Pulse employs **tonal elevation and translucency**:
+Rather than heavy cast shadows, BPlayer employs **tonal elevation and translucency**:
 - **Layer 0 (Base)**: `background` (canvas).
 - **Layer 1 (Card/List)**: `surface` with 1dp `outline`.
 - **Layer 2 (Floating Pods / Mini Player)**: `surfaceElevated` + optional frosted glass + soft ambient shadow (`elevation = 6dp`, `spotColor = Color.Black.copy(alpha = 0.25f)`).

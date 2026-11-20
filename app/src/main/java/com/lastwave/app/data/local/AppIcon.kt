@@ -21,14 +21,6 @@ enum class AppIcon(
         logoRes = R.drawable.ic_launcher_logo,
         backgroundRes = R.color.ic_launcher_background,
     ),
-    DESKTOP(
-        id = "desktop",
-        titleRes = R.string.app_icon_desktop,
-        subtitleRes = R.string.app_icon_desktop_sub,
-        componentName = "com.lastwave.app.MainActivityDesktop",
-        logoRes = R.drawable.ic_launcher_logo_desktop,
-        backgroundRes = R.color.ic_launcher_background_desktop,
-    ),
     WHITE(
         id = "white",
         titleRes = R.string.app_icon_white,

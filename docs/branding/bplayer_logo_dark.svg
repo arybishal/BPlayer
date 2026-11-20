@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <defs>
+    <linearGradient id="emeraldGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+  <!-- BPlayer Dark Mode Logo -->
+  <g id="bplayer-symbol">
+    <!-- Left Stem: Vertical Sound Capsule -->
+    <rect x="30" y="27" width="10" height="54" rx="5" fill="#FFFFFF" />
+    <!-- Upper Loop -->
+    <path d="M 35 27 L 57 27 C 65.28 27 72 33.72 72 42 C 72 50.28 65.28 53.5 57 53.5 L 35 53.5 Z" fill="#FFFFFF" />
+    <!-- Upper Loop Counter Cutout -->
+    <path d="M 40 35 L 56 35 C 60.42 35 64 38.13 64 42 C 64 45.87 60.42 46.5 56 46.5 L 40 46.5 Z" fill="#0E1013" />
+    <!-- Lower Loop -->
+    <path d="M 35 50.5 L 61 50.5 C 70.39 50.5 78 57.11 78 66.5 C 78 75.89 70.39 81 61 81 L 35 81 Z" fill="#FFFFFF" />
+    <!-- Lower Loop Counter: Embedded Play Triangle -->
+    <path d="M 45 56.5 C 45 55.4 46.2 54.7 47.1 55.3 L 64.2 65.1 C 65.1 65.6 65.1 66.9 64.2 67.4 L 47.1 77.2 C 46.2 77.8 45 77.1 45 76.0 Z" fill="url(#emeraldGradDark)" />
+  </g>
+</svg>

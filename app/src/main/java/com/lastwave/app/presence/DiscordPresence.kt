@@ -64,13 +64,12 @@ object DiscordPresence {
     const val APPLICATION_ID = "1552563991426105414"
 
     /**
-     * Repo the card's buttons open — this Android project, so "Get LastWave"
-     * lands on the native build.
+     * Repo the card's buttons open — official BPlayer repository.
      */
-    const val PROJECT_URL = "https://github.com/Clash-Projects/LastWave-Native"
+    const val PROJECT_URL = "https://github.com/arybishal/BPlayer"
     const val RELEASES_URL = "$PROJECT_URL/releases"
-    const val DEFAULT_BUTTON_1 = "Listen On LastWave"
-    const val DEFAULT_BUTTON_2 = "Get LastWave"
+    const val DEFAULT_BUTTON_1 = "Listen On BPlayer"
+    const val DEFAULT_BUTTON_2 = "Get BPlayer"
 
     /** Discord truncates nothing for us: over-long fields are dropped. */
     const val MAX_FIELD = 120
@@ -100,7 +99,7 @@ object DiscordPresence {
      * upload is required.
      */
     const val DISCORD_LOGO_URL =
-        "https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/assets/lastwave_logo.png"
+        "https://raw.githubusercontent.com/arybishal/BPlayer/main/docs/branding/bplayer_logo_dark_512.png"
 
     /** 2 = "Listening to". */
     const val TYPE_LISTENING = 2
@@ -129,7 +128,7 @@ object DiscordPresence {
      */
     fun activityName(title: String): String {
         val trimmed = title.trim()
-        return if (trimmed.isEmpty()) "LastWave" else "LastWave \u00B7 " + clip(trimmed)
+        return if (trimmed.isEmpty()) "BPlayer" else "BPlayer \u00B7 " + clip(trimmed)
     }
 
     /**
@@ -142,7 +141,7 @@ object DiscordPresence {
      * visible on both platforms, so the audio format never depends on hovering.
      */
     fun stateLine(artist: String, album: String?, quality: String): String {
-        val head = artist.trim().ifEmpty { album?.trim()?.takeIf { it.isNotEmpty() } ?: "LastWave" }
+        val head = artist.trim().ifEmpty { album?.trim()?.takeIf { it.isNotEmpty() } ?: "BPlayer" }
         return clip(if (quality.isEmpty()) head else "$head \u00B7 $quality", MAX_STATE)
     }
 
@@ -277,7 +276,7 @@ object DiscordPresence {
         val quality = qualityLine(state)
         // The desktop card keeps the subtitle for the artist and parks the
         // audio-format line in the brand badge's tooltip.
-        val smallText = clip(if (quality.isEmpty()) "LastWave" else "LastWave \u00B7 $quality")
+        val smallText = clip(if (quality.isEmpty()) "BPlayer" else "BPlayer \u00B7 $quality")
 
         return buildJsonObject {
             put("type", TYPE_LISTENING)

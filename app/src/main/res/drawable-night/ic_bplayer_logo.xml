@@ -1,0 +1,27 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- BPlayer Official Symbol (Dark Mode) -->
+    <!-- Vertical Sound Stem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33,33.5 A4.5,4.5 0 0 1 42,33.5 L42,74.5 A4.5,4.5 0 0 1 33,74.5 Z" />
+    <!-- Upper Acoustic Loop -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,29 L56,29 C64.28,29 71,34.15 71,40.5 C71,46.85 64.28,52 56,52 L38,52 Z" />
+    <!-- Upper Counter Cutout (negative space matching dark background #0E1013) -->
+    <path
+        android:fillColor="#0E1013"
+        android:pathData="M42,35.5 L55,35.5 C58.87,35.5 62,37.74 62,40.5 C62,43.26 58.87,45.5 55,45.5 L42,45.5 Z" />
+    <!-- Lower Acoustic Loop -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,50 L58,50 C67.94,50 76,56.49 76,64.5 C76,72.51 67.94,79 58,79 L38,79 Z" />
+    <!-- Play Triangle Head (Vibrant Emerald Accent) -->
+    <path
+        android:fillColor="#34D399"
+        android:pathData="M48,57.5 C48,56.6 49.0,56.0 49.8,56.5 L64.8,64.5 C65.6,64.9 65.6,66.1 64.8,66.5 L49.8,74.5 C49.0,75.0 48,74.4 48,73.5 Z" />
+</vector>

@@ -1,6 +1,6 @@
-# Granular Feature Specifications & Acceptance Criteria — Pulse
+# Granular Feature Specifications & Acceptance Criteria — BPlayer
 
-This document outlines detailed behavioral requirements, edge case mitigations, and explicit acceptance criteria for every feature in **Pulse**.
+This document outlines detailed behavioral requirements, edge case mitigations, and explicit acceptance criteria for every feature in **BPlayer**.
 
 ---
 

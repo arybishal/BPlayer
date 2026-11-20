@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- BPlayer Splash Screen Background (Dark mode: deep obsidian charcoal) -->
+    <color name="splash_background">#FF100F0F</color>
+
+    <!-- BPlayer Launcher Icon Background (Dark mode: deep obsidian black) -->
+    <color name="ic_launcher_background">#FF0E1013</color>
+    <color name="ic_launcher_background_white">#FFFFFFFF</color>
+    <color name="ic_launcher_background_black">#FF000000</color>
+</resources>

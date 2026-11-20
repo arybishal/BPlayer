@@ -959,7 +959,7 @@ class SettingsViewModel @Inject constructor(
             val backup = try {
                 kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                     .decodeFromString(com.lastwave.app.data.backup.BackupFile.serializer(), content)
-                    .takeIf { it.type == "lastwave-backup" }
+                    .takeIf { it.type == "bplayer-backup" || it.type == "lastwave-backup" }
             } catch (e: Exception) { null }
             val mirrorCount = playlistRepository.publicMirrorPlaylistCount(content)
             if (backup == null && mirrorCount == null) {
@@ -1054,7 +1054,7 @@ class SettingsViewModel @Inject constructor(
     fun exportDiagnostics() {
         launchSettingsAction("export diagnostics") {
             val report = withContext(Dispatchers.IO) { buildDiagnosticsReport() }
-            val filename = "lastwave-diagnostics-${System.currentTimeMillis()}.txt"
+            val filename = "bplayer-diagnostics-${System.currentTimeMillis()}.txt"
             fileExportHelper.shareFile(filename, report, "text/plain")
             _uiState.update { it.copy(toastMessage = appContext.getString(com.lastwave.app.R.string.toast_diag_ready)) }
         }
@@ -1062,7 +1062,7 @@ class SettingsViewModel @Inject constructor(
 
     private suspend fun buildDiagnosticsReport(): String = withContext(Dispatchers.IO) {
         val sb = StringBuilder()
-        sb.appendLine("LastWave diagnostics")
+        sb.appendLine("BPlayer diagnostics")
         sb.appendLine("time=${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())}")
         val versionName = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName

@@ -224,7 +224,7 @@ class AppUpdateManager @Inject constructor(
     /** The release page, for the dialog's GitHub button. */
     fun openReleasePage(context: Context) {
         val targetUrl = _updateInfo.value.releaseUrl.ifBlank {
-            "https://github.com/Clash-Projects/LastWave-native/releases"
+            "https://github.com/arybishal/BPlayer/releases"
         }
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

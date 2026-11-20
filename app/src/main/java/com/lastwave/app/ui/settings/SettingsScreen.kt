@@ -1630,7 +1630,7 @@ fun SettingsScreen(
                         else ->
                             if (!ytConnected) "Connect an account first"
                             else if (ytSyncEnabled) "Selected playlists mirror to your account, 24/7" + lastSyncSuffix(ytLastSyncAt)
-                            else "Keep your YT Music library in sync with LastWave"
+                            else "Keep your YT Music library in sync with BPlayer"
                     }
                     // Display name of the active channel: the picked entry when
                     // the channel list was loaded, otherwise the stored name.
@@ -2098,7 +2098,7 @@ fun SettingsScreen(
                                 title = stringResource(R.string.settings_backup),
                                 subtitle = stringResource(R.string.settings_backup_sub),
                                 onClick = {
-                                    runCatching { backupLauncher.launch("lastwave-backup-${System.currentTimeMillis()}.json") }
+                                    runCatching { backupLauncher.launch("bplayer-backup-${System.currentTimeMillis()}.json") }
                                         .onFailure { viewModel.showToast(context.getString(R.string.toast_no_picker)) }
                                 },
                                 position = position,
@@ -2166,53 +2166,25 @@ fun SettingsScreen(
                         item {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     SectionLabel(stringResource(R.string.settings_section_about))
-                    SettingsGroup(rowCount = 4) { index, position ->
+                    SettingsGroup(rowCount = 2) { index, position ->
                         when (index) {
                             0 -> SettingsActionCard(
-                                icon = Icons.AutoMirrored.Filled.Send,
+                                icon = Icons.Filled.Code,
                                 iconContainer = MaterialTheme.colorScheme.primaryContainer,
                                 iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                title = stringResource(R.string.settings_updates_support),
-                                subtitle = stringResource(R.string.set_tg_sub),
+                                title = "Bug Reports & Feedback",
+                                subtitle = "Report issues on GitHub",
                                 onClick = {
-                                    if (!openTelegramChannel(context, "clashprojects")) {
-                                        viewModel.showToast(context.getString(R.string.toast_no_browser_tg))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/arybishal/BPlayer/issues"))
+                                    if (!startActivitySafely(context, intent)) {
+                                        viewModel.showToast(context.getString(R.string.toast_no_browser_plain))
                                     }
                                 },
                                 position = position,
-                                isHighlighted = (highlightedSettingId == "about.telegram_support"),
+                                isHighlighted = (highlightedSettingId == "about.issues"),
                             )
                             1 -> SettingsActionCard(
-                                icon = Icons.Filled.Group,
-                                iconContainer = MaterialTheme.colorScheme.tertiaryContainer,
-                                iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                title = stringResource(R.string.set_discord_support),
-                                subtitle = stringResource(R.string.set_discord_support_sub),
-                                onClick = {
-                                    val discordIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/TMCEPSUNk2"))
-                                    if (!startActivitySafely(context, discordIntent)) {
-                                        viewModel.showToast(context.getString(R.string.toast_no_browser))
-                                    }
-                                },
-                                position = position,
-                                isHighlighted = (highlightedSettingId == "about.discord_support"),
-                            )
-                            2 -> SettingsActionCard(
-                                icon = Icons.Filled.AutoAwesome,
-                                iconContainer = MaterialTheme.colorScheme.primaryContainer,
-                                iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                title = stringResource(R.string.settings_more_from_us),
-                                subtitle = stringResource(R.string.set_more_apps_sub),
-                                onClick = {
-                                    if (!openTelegramChannel(context, "MaterialYouApp")) {
-                                        viewModel.showToast(context.getString(R.string.toast_no_browser_tg))
-                                    }
-                                },
-                                position = position,
-                                isHighlighted = (highlightedSettingId == "about.more_apps"),
-                            )
-                            3 -> SettingsActionCard(
-                                icon = Icons.Filled.Code,
+                                icon = Icons.Filled.Info,
                                 iconContainer = MaterialTheme.colorScheme.secondaryContainer,
                                 iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
                                 title = stringResource(R.string.settings_diagnostics),
@@ -2320,41 +2292,14 @@ fun SettingsScreen(
                         iconContainer = MaterialTheme.colorScheme.secondaryContainer,
                         iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
                         title = stringResource(R.string.settings_source_code),
-                        subtitle = "github.com/Clash-Projects/LastWave-native",
+                        subtitle = "github.com/arybishal/BPlayer",
                         onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Clash-Projects/LastWave-native"))
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/arybishal/BPlayer"))
                             if (!startActivitySafely(context, intent)) {
                                 viewModel.showToast(context.getString(R.string.toast_no_browser_plain))
                             }
                         },
                         isHighlighted = (highlightedSettingId == "about.source_code"),
-                    )
-
-                    SettingsActionCard(
-                        icon = Icons.Filled.Download,
-                        iconContainer = MaterialTheme.colorScheme.secondaryContainer,
-                        iconTint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        title = stringResource(R.string.settings_desktop_app),
-                        subtitle = "github.com/Clash-Projects/LastWave-Desktop",
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Clash-Projects/LastWave-Desktop"))
-                            if (!startActivitySafely(context, intent)) {
-                                viewModel.showToast(context.getString(R.string.toast_no_browser_plain))
-                            }
-                        },
-                        isHighlighted = (highlightedSettingId == "about.desktop_app"),
-                    )
-
-                    Spacer(Modifier.height(14.dp))
-                    SectionLabel("More from us")
-                    Spacer(Modifier.height(8.dp))
-                    MoreFromUsCard(
-                        onOpenUrl = { url ->
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                            if (!startActivitySafely(context, intent)) {
-                                viewModel.showToast(context.getString(R.string.toast_no_browser_plain))
-                            }
-                        }
                     )
                 }
             }

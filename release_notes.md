@@ -1,22 +1,31 @@
-# BPlayer v1.1.0 — Complete LastWave-Native Adaptation & Release 🎵
+# BPlayer v1.1.0 — Master Brand Identity, Original Logo & Clean Production Release 🎵
 
-Welcome to **BPlayer v1.1.0**, delivering the complete adaptation of the **LastWave-Native Liquid Glass design system** and modern audio architecture into BPlayer with dedicated branding and application ID preservation (`com.pulse.player`).
+Welcome to **BPlayer v1.1.0**, featuring our completely new, original BPlayer geometric soundmark logo identity, theme-aware adaptive icons, clean team attribution, and full standardization on the official BPlayer repository (`https://github.com/arybishal/BPlayer`).
 
 ---
 
-### 🌟 What's New in v1.1.0
+### 🌟 Key Highlights & Brand Overhaul
 
-- **✨ Complete LastWave-Native Liquid Glass Design System**:
-  - Full Liquid Glass optical translucency with 1dp boundary borders and backdrop blur.
-  - Google Sans Flex responsive variable typography.
-  - 19 curated preset color palettes with dynamic Monet wallpaper adaptation.
-  - Pure Black AMOLED mode (`#000000`) and Obsidian Dark theme (`#0F1115`).
-  - Strict Warm Palette compliance: zero blue gradients or generic tech templates.
+- **✨ Original BPlayer Soundmark Logo**:
+  - Distinctive, minimalist, modern emblem: vertical acoustic stem + dual resonant acoustic loops forming an iconic "B" with embedded forward Play Triangle (▶).
+  - Theme-aware selection via Android night-qualified resources (`drawable` vs `drawable-night`, `values` vs `values-night`):
+    - **Light Mode**: Deep Obsidian Charcoal (`#121316`) + Vivid Hi-Fi Emerald (`#10B981`) on pure white background (`#FFFFFFFF`).
+    - **Dark Mode**: Crisp Luminescent White (`#FFFFFF`) + Radiant Emerald (`#34D399`) on obsidian dark background (`#FF100F0F`).
+  - Full vector XML deliverables: `ic_bplayer_logo.xml`, `ic_bplayer_logo_mono.xml` (evenOdd fill rule for Android 13+ dynamic themed icons), and complete raster mipmaps (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi).
+  - Zero-flicker splash screen branding.
 
-- **📻 Dynamic Home Feed & Discovery**:
-  - "Made For You" infinite radio station generated dynamically from listening history.
-  - Quick access vibes (Podcasts, Relax, Workout, Energize).
-  - Liked Songs and Discover Mix stations.
+- **🛡️ Clean Team Attribution & Strict Identity Isolation**:
+  - Removed incorrect country flag (`ic_flag_india.xml`) completely. No nationality or country flags anywhere in the app.
+  - Standardized clean team attribution: **Crafted by BPlayer Team**.
+  - Purged misleading "Download Desktop App" option and all unused desktop launcher assets.
+  - Purged unrelated "More from us" cross-promotions (Sennheiser, Lyricify, Sleep Tracker cards, upstream Telegram/Discord links) without touching actual audio hardware, lyrics engine, or sleep timer functionality.
+  - Standardized app name to **BPlayer** across all 14 localized translation resource catalogs.
+  - Cleaned expanded player notifications to `BPLAYER  •  NOW PLAYING`.
+  - Updated lyrics share cards with BPlayer watermark branding.
+
+- **🌐 Official Repository Integration**:
+  - Source code, issue tracker, in-app updater, and release discovery integrated exclusively with `https://github.com/arybishal/BPlayer`.
+  - Update API connected to `https://api.github.com/repos/arybishal/BPlayer/releases/latest`.
 
 - **🎧 Audiophile Audio Engine & DSP**:
   - High-precision Oboe C++ native audio engine with low-latency AAudio and OpenSL ES.
@@ -31,17 +40,17 @@ Welcome to **BPlayer v1.1.0**, delivering the complete adaptation of the **LastW
 - **🔒 Privacy & Storage Architecture**:
   - AES-256-GCM encrypted backup & restore with fuzzy track reconciliation (`.bplayerbackup` / `.pulsebackup`).
   - Scoped storage in-place ID3/FLAC/Vorbis audio tag editing.
-  - GitHub In-App Updater directly integrated with `https://api.github.com/repos/arybishal/BPlayer/releases`.
 
 ---
 
 ### 📦 Release Artifacts & Checksums
 
 - **APK File**: `BPlayer-v1.1.0-release.apk`
-- **Application ID**: `com.pulse.player`
+- **Application ID**: `com.pulse.player` (preserved for install compatibility)
 - **Version Code**: `2`
 - **Version Name**: `1.1.0`
-- **SHA-256 Checksum**: `A270AF4215BFBB470CE3AAF52EB796DAA7DBFBF5757D714A24DD17F782E79CAF`
+- **File Size**: `27,560,623` bytes (26.28 MB)
+- **SHA-256 Checksum**: `EFE887A89088E24BF8613F1391795C53B58F5F72CB7DE884F3443C7A2443BAE7`
 - **Target Android**: Android 8.0+ (API 26 to 35)
 
 ---

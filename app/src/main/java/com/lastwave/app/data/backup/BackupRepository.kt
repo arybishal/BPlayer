@@ -23,7 +23,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val SCHEMA_VERSION = 8
-private const val BACKUP_TYPE = "lastwave-backup"
+private const val BACKUP_TYPE = "bplayer-backup"
+private const val LEGACY_BACKUP_TYPE = "lastwave-backup"
 
 /**
  * Preference keys whose on-disk type is Long. Backup schema <= 7 incorrectly
@@ -132,7 +133,7 @@ class BackupRepository @Inject constructor(
     fun checkBackup(content: String): BackupCheck {
         val backup = runCatching { json.decodeFromString<BackupFile>(content) }.getOrNull()
             ?: return BackupCheck.Invalid
-        if (backup.type != BACKUP_TYPE) return BackupCheck.Invalid
+        if (backup.type != BACKUP_TYPE && backup.type != LEGACY_BACKUP_TYPE) return BackupCheck.Invalid
         if (backup.schemaVersion > SCHEMA_VERSION) return BackupCheck.UnsupportedSchema
         return BackupCheck.Valid(backup.playlists.size)
     }

@@ -375,8 +375,9 @@ fun TrackContextMenuSheet(
     capabilities: TrackMenuCapabilities,
     playableTrack: PlayableTrack? = null,
     onDismiss: () -> Unit,
-    playbackSourceLabel: String = "LastWave",
+    playbackSourceLabel: String = "BPlayer",
     onPlayInLastWave: (() -> Unit)? = null,
+    onPlayInBPlayer: (() -> Unit)? = null,
     onStartMix: ((trackName: String, artistName: String) -> Unit)? = null,
     onExploreGenre: ((genre: String) -> Unit)? = null,
     onDeleteScrobble: ((trackName: String, artistName: String) -> Unit)? = null,
@@ -445,7 +446,7 @@ fun TrackContextMenuSheet(
                 onDismiss()
             },
             onPlayTrack = {
-                onPlayInLastWave?.invoke() ?: musicPlayer.play(playable, sourceLabel = playbackSourceLabel)
+                (onPlayInBPlayer ?: onPlayInLastWave)?.invoke() ?: musicPlayer.play(playable, sourceLabel = playbackSourceLabel)
             },
         )
         return
@@ -711,7 +712,7 @@ fun TrackContextMenuSheet(
                             label = stringResource(R.string.menu_quick_play),
                             position = pos,
                         ) {
-                            onPlayInLastWave?.invoke() ?: musicPlayer.play(playable, sourceLabel = playbackSourceLabel)
+                            (onPlayInBPlayer ?: onPlayInLastWave)?.invoke() ?: musicPlayer.play(playable, sourceLabel = playbackSourceLabel)
                             onDismiss()
                         }
                     }
