@@ -1,7 +1,6 @@
 package com.lastwave.app.ui.common
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
@@ -10,23 +9,26 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-
+import com.lastwave.app.ui.theme.LiquidGlassPreset
+import com.lastwave.app.ui.theme.LocalLiquidGlass
+import com.lastwave.app.ui.theme.liquidGlassChrome
+import com.lastwave.app.ui.theme.liquidGlassContainerColor
 
 /**
- * Keeps content composition stable when Liquid Glass is toggled.
+ * LiquidGlassCard: Renders content within an authentic iOS-style
+ * frosted translucent glass card when Liquid Glass is enabled.
  */
 @Composable
 fun LiquidGlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(24.dp),
-    enabled: Boolean = false,
+    enabled: Boolean = LocalLiquidGlass.current,
     tintColor: Color = Color.Unspecified,
     contentColor: Color = Color.Unspecified,
     onClick: (() -> Unit)? = null,
@@ -39,6 +41,11 @@ fun LiquidGlassCard(
     }
 
     val baseColor = if (tintColor.isSpecified) tintColor else MaterialTheme.colorScheme.surfaceContainer
+    val containerColor = liquidGlassContainerColor(
+        color = baseColor,
+        enabled = enabled,
+    )
+
     val clickModifier = if (onClick != null) {
         Modifier.clickable(
             role = Role.Button,
@@ -47,10 +54,16 @@ fun LiquidGlassCard(
     } else Modifier
 
     Card(
-        modifier = modifier.then(clickModifier),
+        modifier = modifier
+            .liquidGlassChrome(
+                shape = shape,
+                enabled = enabled,
+                preset = LiquidGlassPreset.Card,
+            )
+            .then(clickModifier),
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = baseColor,
+            containerColor = containerColor,
             contentColor = resolvedContentColor,
         ),
     ) {

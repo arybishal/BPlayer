@@ -85,7 +85,7 @@ fun ExpressiveHeader(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val liquidGlass = LocalLiquidGlass.current
-    val isGlass = liquidGlass && isLiquidGlassBackdropSupported()
+    val isGlass = liquidGlass
     val isDark = LocalIsDarkTheme.current
     val backgroundColor = MaterialTheme.colorScheme.background
     val isCustomColor = containerColor != Color.Unspecified
@@ -99,7 +99,7 @@ fun ExpressiveHeader(
     }
 
     val effectiveBackdrop = backdrop ?: headerBackdrop
-    val useGlass = isGlass && !isCustomColor && effectiveBackdrop != null
+    val useGlass = isGlass && !isCustomColor
 
     val resolvedContainerColor = when {
         isCustomColor -> containerColor
@@ -213,7 +213,7 @@ fun HeaderActionIcon(
     contentDescription: String?,
     onClick: () -> Unit,
 ) {
-    val isGlass = LocalLiquidGlass.current && isLiquidGlassBackdropSupported()
+    val isGlass = LocalLiquidGlass.current
     val isDark = LocalIsDarkTheme.current
     FilledTonalIconButton(
         onClick = onClick,

@@ -416,9 +416,7 @@ internal fun MainControls(state: MusicPlayerState, player: MusicPlayer, isTransl
         // device, missing backdrop) rendered a white icon on the solid-white
         // fallback below â€” the "whole white" play button. Gating content on
         // the same active flag closes that mismatch for every path.
-        val isPillGlassActive = LocalLiquidGlass.current &&
-            isLiquidGlassBackdropSupported() &&
-            LocalLiquidGlassBackdrop.current != null
+        val isPillGlassActive = LocalLiquidGlass.current
         LiquidGlassSurface(
             glassModifier = Modifier.liquidGlassChrome(pillShape, LocalLiquidGlass.current, LiquidGlassPreset.FloatingControls, interactionSource = playInteraction),
             onClick = hapticClick(if (state.isPlaying) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn, player::togglePlayPause),

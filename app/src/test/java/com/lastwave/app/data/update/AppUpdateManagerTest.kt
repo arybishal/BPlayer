@@ -145,13 +145,32 @@ class AppUpdateManagerTest {
     }
 
     @Test
-    fun selectBestAsset_normalBuild_neverSelectsVivoApk() {
-        val onlyVivo = listOf(ReleaseAsset(name = "BPlayer-v4.2.4-vivo-origin.apk", downloadUrl = "https://example.com/vivo"))
-        assertThat(
-            AppUpdateManager.selectBestAsset(assets = onlyVivo, isUncompressed = false, sdkInt = 34),
-        ).isNull()
-        assertThat(
-            AppUpdateManager.selectBestAsset(assets = assetsWithVivo, isUncompressed = false, sdkInt = 34)?.name,
-        ).isEqualTo("BPlayer-v4.2.4-universal.apk")
+    fun isNewerVersion_detectsNewerVersionsCorrectly() {
+        assertThat(AppUpdateManager.isNewerVersion("v1.2.1", "1.2.0")).isTrue()
+        assertThat(AppUpdateManager.isNewerVersion("1.3.0", "1.2.0")).isTrue()
+        assertThat(AppUpdateManager.isNewerVersion("2.0.0", "1.2.0")).isTrue()
+        assertThat(AppUpdateManager.isNewerVersion("v1.2.0-beta", "1.2.0")).isFalse()
+        assertThat(AppUpdateManager.isNewerVersion("1.2.0", "1.2.0")).isFalse()
+        assertThat(AppUpdateManager.isNewerVersion("1.1.9", "1.2.0")).isFalse()
+        assertThat(AppUpdateManager.isNewerVersion("", "1.2.0")).isFalse()
+    }
+
+    @Test
+    fun updateDownloadState_implementsExpectedTypes() {
+        val idle: UpdateDownloadState = UpdateDownloadState.Idle
+        assertThat(idle).isInstanceOf(UpdateDownloadState.Idle::class.java)
+
+        val downloading: UpdateDownloadState = UpdateDownloadState.Downloading(
+            bytesDownloaded = 500L,
+            totalBytes = 1000L,
+            progress = 0.5f,
+        )
+        assertThat((downloading as UpdateDownloadState.Downloading).progress).isEqualTo(0.5f)
+
+        val failed: UpdateDownloadState = UpdateDownloadState.Failed("Disk error")
+        assertThat((failed as UpdateDownloadState.Failed).error).isEqualTo("Disk error")
+
+        val ready: UpdateDownloadState = UpdateDownloadState.ReadyToInstall(java.io.File("test.apk"))
+        assertThat((ready as UpdateDownloadState.ReadyToInstall).apkFile.name).isEqualTo("test.apk")
     }
 }

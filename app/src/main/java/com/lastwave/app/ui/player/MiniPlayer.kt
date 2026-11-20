@@ -394,7 +394,7 @@ internal fun MiniPlayer(
     // MiniPlayer: single glass card sampling sibling feed content.
     // Luminance loop (5x5 avg, 0.3..0.8, tween 500, 1s).
     val liquidGlass = LocalLiquidGlass.current
-    val isGlass = liquidGlass && isLiquidGlassBackdropSupported() && backdrop != null
+    val isGlass = liquidGlass
     val luminance = 0.5f // Fixed luminance to avoid heavy GPU readback which causes stuttering
     val barInteraction = remember { MutableInteractionSource() }
     // Drag offsets live in Animatables read only in the graphicsLayer below, so a drag
@@ -460,16 +460,14 @@ internal fun MiniPlayer(
         if (isGlass) {
             Surface(
                 shape = shape,
-                // Transparent card when glass (glass draws scrim), 95% primaryContainer otherwise to match theme color.
+                // Transparent card when glass (glass draws translucent surface, sheen and border)
                 color = Color.Transparent,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
-                modifier = Modifier.fillMaxWidth().then(
-                    if (backdrop != null) {
-                        Modifier.liquidGlass(backdrop, luminance, shape)
-                    } else Modifier
-                )
-                .clickable(interactionSource = barInteraction, indication = null, onClick = onExpand),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlass(backdrop, luminance, shape)
+                    .clickable(interactionSource = barInteraction, indication = null, onClick = onExpand),
             ) {
                 Column(
                     modifier = if (edgeToEdge) {

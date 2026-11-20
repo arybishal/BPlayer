@@ -463,7 +463,7 @@ fun PlayerHost(
         drawRect(miniBackdropColor)
         drawContent()
     }
-    val miniGlass = LocalLiquidGlass.current && isLiquidGlassBackdropSupported() && !webContentScreen
+    val miniGlass = LocalLiquidGlass.current && !webContentScreen
 
     // Player presentation (open / close): driven by sheet expansion progress (0..1).
     // The player slides smoothly from the bottom over the content like a native

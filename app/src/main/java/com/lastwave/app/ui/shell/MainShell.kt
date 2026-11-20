@@ -373,18 +373,11 @@ fun MainShell(
 
     val backgroundColor = MaterialTheme.colorScheme.background
     val hideNavTabs = com.lastwave.app.ui.theme.LocalHideNavTabs.current
-    val useLiquidNavigation = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-        LocalLiquidGlass.current && !hideNavTabs
-    val navigationLiquidState = if (useLiquidNavigation) rememberLiquidState() else null
-    // Only one renderer records the pager for navigation. The bar is hosted by
-    // PlayerHost as a sibling, never below its own liquefiable source.
-    val navigationBackdrop = if (!useLiquidNavigation) {
-        rememberLayerBackdrop {
-            drawRect(backgroundColor)
-            drawContent()
-        }
-    } else null
-    val navGlass = isLiquidGlassBackdropSupported()
+    val navigationBackdrop = rememberLayerBackdrop {
+        drawRect(backgroundColor)
+        drawContent()
+    }
+    val navGlass = LocalLiquidGlass.current
     val chromeCollapse = LocalChromeCollapse.current
     // Each tab keeps its own scroll offset: a compact bar carried onto a tab
     // resting at its top would have nothing to scroll back up to expand it.
@@ -403,12 +396,8 @@ fun MainShell(
             modifier = Modifier.fillMaxSize()
                 .then(if (chromeCollapse != null) Modifier.nestedScroll(chromeCollapse.connection) else Modifier)
                 .then(
-                if (navigationLiquidState != null) {
-                    Modifier.liquefiable(navigationLiquidState).background(backgroundColor)
-                } else {
                     Modifier.liquidGlassSource(if (navGlass) navigationBackdrop else null)
-                },
-            ),
+                ),
         ) { page ->
             // derivedStateOf: reading currentPage directly recomposed every
             // page's whole tab each time it flipped halfway through a swipe.
@@ -524,47 +513,25 @@ fun MainShell(
             selectLiquidTab(index, refreshIfSelected = false)
         }
 
-        androidx.compose.runtime.DisposableEffect(navigationBackdrop, navigationLiquidState, tabs, hideNavTabs) {
+        androidx.compose.runtime.DisposableEffect(navigationBackdrop, tabs, hideNavTabs) {
             if (!hideNavTabs) {
-                bottomNavSlot.value = { material3NavigationEnabled ->
+                bottomNavSlot.value = { _ ->
                     Box(Modifier.fillMaxSize()) {
                         val collapse = LocalChromeCollapse.current
                         val collapseProgress = collapse?.progress ?: { 0f }
                         val barModifier = Modifier.align(Alignment.BottomCenter).collapsingNavBar(collapseProgress)
                         val pillModifier = Modifier.align(Alignment.BottomStart).collapsedNavPill(collapseProgress)
                         val expand = { collapse?.expand(); Unit }
-                        if (navigationLiquidState != null) {
-                            val items = tabs.map { tab ->
-                                LiquidNavigationItem(
-                                    label = androidx.compose.ui.res.stringResource(tab.labelRes),
-                                    icon = tab.icon(),
-                                )
-                            }
-                            LiquidNavigationBar(
-                                liquidState = navigationLiquidState,
-                                items = items,
-                                selectedIndex = currentSelectedIndex,
-                                onSelect = currentOnLiquidSelect,
-                                onScrubSelect = currentOnScrubSelect,
-                                modifier = barModifier,
-                                style = if (material3NavigationEnabled) {
-                                    LiquidNavigationStyle.Material3
-                                } else {
-                                    LiquidNavigationStyle.Tabs
-                                },
-                            )
-                            LiquidNavigationPill(navigationLiquidState, items[currentSelectedIndex], expand, pillModifier)
-                        } else {
-                            FloatingNavBar(
-                                backdrop = navigationBackdrop,
-                                tabs = tabs,
-                                selectedIndex = currentSelectedIndex,
-                                onSelect = currentOnSelect,
-                                onOpenGenerator = currentOnOpenGenerator,
-                                modifier = barModifier,
-                            )
-                            FloatingNavPill(navigationBackdrop, tabs[currentSelectedIndex], expand, pillModifier)
-                        }
+
+                        FloatingNavBar(
+                            backdrop = navigationBackdrop,
+                            tabs = tabs,
+                            selectedIndex = currentSelectedIndex,
+                            onSelect = currentOnSelect,
+                            onOpenGenerator = currentOnOpenGenerator,
+                            modifier = barModifier,
+                        )
+                        FloatingNavPill(navigationBackdrop, tabs[currentSelectedIndex], expand, pillModifier)
                     }
                 }
             } else {
@@ -592,7 +559,7 @@ private fun FloatingNavBar(
     val dockInteraction = remember { MutableInteractionSource() }
     val fabInteraction = remember { MutableInteractionSource() }
     
-    if (!md3NavBar) {
+    if (md3NavBar) {
         val navContainerColor = liquidGlassContainerColor(
             MaterialTheme.colorScheme.surfaceContainer,
             enabled = liquidGlass,

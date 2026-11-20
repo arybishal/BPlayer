@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -35,6 +36,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -359,6 +361,55 @@ fun LiquidGlassSurface(
 // no progressive blur, no always-on chromatic aberration.
 // Effect stack is drawInteractiveGlass.
 
+/**
+ * True iOS-style translucent frosted glass surface modifier.
+ * Used universally across the app when backdrop is absent or on API 26-30 fallback.
+ * Applies:
+ * 1. High-alpha translucent surface (charcoal obsidian in dark mode, frosted pearl in light mode)
+ * 2. 1dp subtle specular gradient border (Color.White.copy(0.22f) to Color.White.copy(0.06f))
+ * 3. Specular top vertical sheen gradient catching light on the top edge
+ */
+fun Modifier.iosTranslucentGlass(
+    shape: Shape,
+    isDark: Boolean,
+    alpha: Float = if (isDark) 0.68f else 0.78f,
+    border: Boolean = true,
+    sheen: Boolean = true,
+): Modifier = this
+    .clip(shape)
+    .background(
+        color = if (isDark) Color(0xFF101318).copy(alpha = alpha) else Color(0xFFFFFFFF).copy(alpha = alpha),
+        shape = shape,
+    )
+    .then(
+        if (sheen) {
+            Modifier.drawWithContent {
+                drawContent()
+                // Top specular highlight sheen
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to Color.White.copy(alpha = if (isDark) 0.12f else 0.24f),
+                        0.45f to Color.Transparent,
+                    ),
+                )
+            }
+        } else Modifier
+    )
+    .then(
+        if (border) {
+            Modifier.border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color.White.copy(alpha = if (isDark) 0.22f else 0.42f),
+                        Color.White.copy(alpha = if (isDark) 0.06f else 0.12f),
+                    )
+                ),
+                shape = shape,
+            )
+        } else Modifier
+    )
+
 @Composable
 fun isDeviceGlassCapable(): Boolean {
     val view = LocalView.current
@@ -391,9 +442,15 @@ fun liquidGlassContainerColor(
     color: Color,
     enabled: Boolean = LocalLiquidGlass.current,
     backdrop: Backdrop? = LocalLiquidGlassBackdrop.current,
-): Color = if (enabled && isLiquidGlassBackdropSupported() && backdrop != null) {
-    if (color.isSpecified && color.alpha < 0.95f) color else Color.Transparent
-} else color
+): Color {
+    if (!enabled) return color
+    return if (isLiquidGlassBackdropSupported() && backdrop != null) {
+        if (color.isSpecified && color.alpha < 0.95f) color else Color.Transparent
+    } else {
+        val isDark = LocalIsDarkTheme.current
+        if (isDark) Color(0xFF101318).copy(alpha = 0.68f) else Color(0xFFFFFFFF).copy(alpha = 0.78f)
+    }
+}
 
 @Composable
 fun isLiquidGlassEnabled(): Boolean = LocalLiquidGlass.current
@@ -567,44 +624,52 @@ fun Modifier.drawInteractiveGlass(
  */
 @Composable
 fun Modifier.headerLiquidGlass(
-    backdrop: Backdrop,
+    backdrop: Backdrop?,
     shape: Shape,
 ): Modifier {
-    if (!LocalLiquidGlass.current || !isLiquidGlassBackdropSupported()) return this
+    if (!LocalLiquidGlass.current) return this
     val isDark = LocalIsDarkTheme.current
-    return this.drawBackdrop(
-        backdrop = backdrop,
-        shape = { lensSafeGlassShape(shape) },
-        highlight = { HeaderGlassRecipe.RIM },
-        effects = {
-            colorControls(
-                brightness = if (isDark) HeaderGlassRecipe.BRIGHTNESS_DARK else HeaderGlassRecipe.BRIGHTNESS_LIGHT,
-                contrast = 1f,
-                saturation = HeaderGlassRecipe.SATURATION,
-            )
-            blur(HeaderGlassRecipe.BLUR_DP.dp.toPx())
-            lens(
-                HeaderGlassRecipe.LENS_HEIGHT_DP.dp.toPx().coerceAtMost(size.minDimension / 3f),
-                HeaderGlassRecipe.LENS_AMOUNT_DP.dp.toPx().coerceAtMost(size.minDimension / 2f),
-                false,
-            )
-        },
-        onDrawBackdrop = { drawBackdrop -> drawBackdrop() },
-        onDrawSurface = {
-            drawRect(
-                (if (isDark) Color.Black else Color.White).copy(
-                    alpha = if (isDark) HeaderGlassRecipe.TINT_DARK else HeaderGlassRecipe.TINT_LIGHT,
-                ),
-            )
-            // Sheen: light catching the top of the pane.
-            drawRect(
-                brush = Brush.verticalGradient(
-                    0f to Color.White.copy(alpha = if (isDark) 0.07f else 0.16f),
-                    0.55f to Color.Transparent,
-                ),
-            )
-        },
-    )
+    if (backdrop != null && isLiquidGlassBackdropSupported()) {
+        return this.drawBackdrop(
+            backdrop = backdrop,
+            shape = { lensSafeGlassShape(shape) },
+            highlight = { HeaderGlassRecipe.RIM },
+            effects = {
+                colorControls(
+                    brightness = if (isDark) HeaderGlassRecipe.BRIGHTNESS_DARK else HeaderGlassRecipe.BRIGHTNESS_LIGHT,
+                    contrast = 1f,
+                    saturation = HeaderGlassRecipe.SATURATION,
+                )
+                blur(HeaderGlassRecipe.BLUR_DP.dp.toPx())
+                lens(
+                    HeaderGlassRecipe.LENS_HEIGHT_DP.dp.toPx().coerceAtMost(size.minDimension / 3f),
+                    HeaderGlassRecipe.LENS_AMOUNT_DP.dp.toPx().coerceAtMost(size.minDimension / 2f),
+                    false,
+                )
+            },
+            onDrawBackdrop = { drawBackdrop -> drawBackdrop() },
+            onDrawSurface = {
+                drawRect(
+                    (if (isDark) Color.Black else Color.White).copy(
+                        alpha = if (isDark) HeaderGlassRecipe.TINT_DARK else HeaderGlassRecipe.TINT_LIGHT,
+                    ),
+                )
+                // Sheen: light catching the top of the pane.
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        0f to Color.White.copy(alpha = if (isDark) 0.07f else 0.16f),
+                        0.55f to Color.Transparent,
+                    ),
+                )
+            },
+        )
+    } else {
+        return this.iosTranslucentGlass(
+            shape = shape,
+            isDark = isDark,
+            alpha = if (isDark) HeaderGlassRecipe.TINT_DARK else HeaderGlassRecipe.TINT_LIGHT,
+        )
+    }
 }
 
 private object HeaderGlassRecipe {
@@ -633,7 +698,7 @@ internal fun lensSafeGlassShape(shape: Shape): Shape =
 /** Interactive liquidGlass: static surfaces use fixed mid-luminance. */
 @Composable
 fun Modifier.liquidGlass(
-    backdrop: Backdrop,
+    backdrop: Backdrop?,
     shape: Shape = CircleShape,
     interactive: Boolean = true,
     highlight: Highlight = Highlight.Default,
@@ -644,27 +709,29 @@ fun Modifier.liquidGlass(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
     }
-    if (!isLiquidGlassBackdropSupported()) {
-        return this
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
-    }
     val isDark = forceDark || LocalIsDarkTheme.current
-    val interaction = rememberGlassInteraction()
-    return this.drawInteractiveGlass(
-        isDark = isDark,
-        backdrop = backdrop,
-        luminanceAnimation = 0.5f,
-        shape = shape,
-        interaction = if (interactive) interaction else null,
-        highlight = highlight,
-    )
+    if (backdrop != null && isLiquidGlassBackdropSupported()) {
+        val interaction = rememberGlassInteraction()
+        return this.drawInteractiveGlass(
+            isDark = isDark,
+            backdrop = backdrop,
+            luminanceAnimation = 0.5f,
+            shape = shape,
+            interaction = if (interactive) interaction else null,
+            highlight = highlight,
+        )
+    } else {
+        return this.iosTranslucentGlass(
+            shape = shape,
+            isDark = isDark,
+        )
+    }
 }
 
 /** Interactive liquidGlass overload for luminance-sampling surfaces (MiniPlayer, nav capsule). */
 @Composable
 fun Modifier.liquidGlass(
-    backdrop: Backdrop,
+    backdrop: Backdrop?,
     luminanceAnimation: Float,
     shape: Shape = CircleShape,
     interactive: Boolean = true,
@@ -673,24 +740,31 @@ fun Modifier.liquidGlass(
     maxScrim: Float = GlassRecipe.MAX_SCRIM,
     forceDark: Boolean = false,
 ): Modifier {
-    if (!LocalLiquidGlass.current || !isLiquidGlassBackdropSupported()) {
+    if (!LocalLiquidGlass.current) {
         return this
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
     }
     val isDark = forceDark || LocalIsDarkTheme.current
-    val interaction = rememberGlassInteraction()
-    return this.drawInteractiveGlass(
-        isDark = isDark,
-        backdrop = backdrop,
-        luminanceAnimation = luminanceAnimation,
-        shape = shape,
-        interaction = if (interactive) interaction else null,
-        pressedScale = 1.04f,
-        blurScale = blurScale,
-        minScrim = minScrim,
-        maxScrim = maxScrim,
-    )
+    if (backdrop != null && isLiquidGlassBackdropSupported()) {
+        val interaction = rememberGlassInteraction()
+        return this.drawInteractiveGlass(
+            isDark = isDark,
+            backdrop = backdrop,
+            luminanceAnimation = luminanceAnimation,
+            shape = shape,
+            interaction = if (interactive) interaction else null,
+            pressedScale = 1.04f,
+            blurScale = blurScale,
+            minScrim = minScrim,
+            maxScrim = maxScrim,
+        )
+    } else {
+        return this.iosTranslucentGlass(
+            shape = shape,
+            isDark = isDark,
+        )
+    }
 }
 
 @Composable
@@ -703,7 +777,7 @@ fun LiquidGlassContainer(
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    if (backdrop == null || !isLiquidGlassBackdropSupported()) {
+    if (!LocalLiquidGlass.current) {
         Box(
             modifier = modifier
                 .clip(shape)
@@ -728,7 +802,7 @@ fun LiquidGlassActionPill(
     shape: Shape = RoundedCornerShape(24.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
-    if (backdrop == null || !isLiquidGlassBackdropSupported()) {
+    if (!LocalLiquidGlass.current) {
         Row(
             modifier = modifier
                 .clip(shape)
@@ -815,21 +889,12 @@ enum class LiquidGlassPreset {
     Card,
 }
 
-private fun LiquidGlassPreset.isGlassTarget(): Boolean = when (this) {
-    LiquidGlassPreset.BottomNavigation,
-    LiquidGlassPreset.MiniPlayer,
-    LiquidGlassPreset.PlayerControls,
-    LiquidGlassPreset.FloatingControls,
-    LiquidGlassPreset.Header -> true
-    LiquidGlassPreset.ModalSheet,
-    LiquidGlassPreset.ContextMenu,
-    LiquidGlassPreset.Overlay,
-    LiquidGlassPreset.Card -> false
-}
+private fun LiquidGlassPreset.isGlassTarget(): Boolean = true
 
 /**
- * Compat shim: old liquidGlassChrome now delegates to drawInteractiveGlass
- * for allowed targets only; all other presets return unmodified (opaque fallback).
+ * Universal liquidGlassChrome: delegates to live drawInteractiveGlass when
+ * backdrop and hardware capability exist, and smoothly falls back to genuine
+ * iOS-style translucent frosted glass with 1dp specular border on other configurations.
  */
 @Composable
 fun Modifier.liquidGlassChrome(
@@ -844,21 +909,26 @@ fun Modifier.liquidGlassChrome(
     onPointerPosition: ((Offset?) -> Unit)? = null,
     forceDark: Boolean = false,
 ): Modifier {
-    if (!enabled || !preset.isGlassTarget() || backdrop == null || !isLiquidGlassBackdropSupported()) {
-        return this
-    }
-    // PlayerControls and FloatingControls in Now Playing always use dark-glass
-    // styling matching dark mode so they remain crisp and legible against immersive media backdrops.
+    if (!enabled) return this
+    val isDark = forceDark || LocalIsDarkTheme.current
     val shouldForceDark = forceDark ||
         preset == LiquidGlassPreset.PlayerControls ||
         preset == LiquidGlassPreset.FloatingControls
-    return this.liquidGlass(
-        backdrop = backdrop,
-        shape = shape,
-        interactive = preset != LiquidGlassPreset.BottomNavigation && preset != LiquidGlassPreset.Header,
-        highlight = Highlight.Default,
-        forceDark = shouldForceDark,
-    )
+
+    return if (backdrop != null && isLiquidGlassBackdropSupported()) {
+        this.liquidGlass(
+            backdrop = backdrop,
+            shape = shape,
+            interactive = preset != LiquidGlassPreset.BottomNavigation && preset != LiquidGlassPreset.Header,
+            highlight = Highlight.Default,
+            forceDark = shouldForceDark,
+        )
+    } else {
+        this.iosTranslucentGlass(
+            shape = shape,
+            isDark = if (shouldForceDark) true else isDark,
+        )
+    }
 }
 
 /**

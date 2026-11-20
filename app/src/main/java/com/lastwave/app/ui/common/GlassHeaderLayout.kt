@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lastwave.app.ui.theme.LayerBackdrop
-import com.lastwave.app.ui.theme.isLiquidGlassBackdropSupported
+import com.lastwave.app.ui.theme.LocalLiquidGlass
 import com.lastwave.app.ui.theme.liquidGlassSource
 import com.lastwave.app.ui.theme.rememberLayerBackdrop
 
@@ -46,7 +46,7 @@ fun GlassHeaderLayout(
         drawRect(wash, size = Size(size.width, headerHeightPx.toFloat()))
         drawContent()
     }
-    val glass = isLiquidGlassBackdropSupported() && backdrop != null
+    val glass = LocalLiquidGlass.current
     val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
     Box(modifier) {
         Box(

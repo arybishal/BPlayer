@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.core.content.FileProvider
 import com.lastwave.app.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +21,24 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+
+sealed interface UpdateDownloadState {
+    data object Idle : UpdateDownloadState
+    data class Downloading(
+        val bytesDownloaded: Long,
+        val totalBytes: Long,
+        val progress: Float,
+    ) : UpdateDownloadState
+    data class ReadyToInstall(
+        val apkFile: File,
+    ) : UpdateDownloadState
+    data class Failed(
+        val error: String,
+    ) : UpdateDownloadState
+}
 
 data class UpdateInfo(
     val isChecking: Boolean = false,
@@ -68,6 +87,11 @@ class AppUpdateManager @Inject constructor(
         )
     )
     val updateInfo: StateFlow<UpdateInfo> = _updateInfo.asStateFlow()
+
+    private val _downloadState = MutableStateFlow<UpdateDownloadState>(UpdateDownloadState.Idle)
+    val downloadState: StateFlow<UpdateDownloadState> = _downloadState.asStateFlow()
+
+    private var activeDownloadJob: Job? = null
 
     init {
         checkForUpdate(isSilent = true)
@@ -235,10 +259,169 @@ class AppUpdateManager @Inject constructor(
     }
 
     @Volatile private var autoDialogShown = false
+
     /**
-     * Update now: opens this build's APK download in the browser, as before;
-     * the listener installs it from there, so no install permission is needed.
-     * A release without an APK for this build opens its release page instead.
+     * Downloads the APK in-background with live streaming progress,
+     * writes it to cacheDir/updates, and triggers native in-app installation.
+     */
+    fun downloadAndInstallUpdate(context: Context) {
+        val info = _updateInfo.value
+        val url = info.downloadUrl?.takeIf { it.isNotBlank() }
+        if (url == null) {
+            _downloadState.value = UpdateDownloadState.Failed("No download URL found for this release.")
+            return
+        }
+
+        activeDownloadJob?.cancel()
+        activeDownloadJob = scope.launch {
+            _downloadState.value = UpdateDownloadState.Downloading(
+                bytesDownloaded = 0L,
+                totalBytes = info.downloadSizeBytes,
+                progress = 0f,
+            )
+
+            val updatesDir = File(context.cacheDir, "updates").apply { mkdirs() }
+            val fileName = info.downloadFileName?.takeIf { it.isNotBlank() }
+                ?: "bplayer-v${info.latestVersion.ifBlank { "update" }}.apk"
+            val targetFile = File(updatesDir, fileName)
+            val tempFile = File(updatesDir, "$fileName.downloading")
+
+            try {
+                if (tempFile.exists()) tempFile.delete()
+
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Accept", "application/octet-stream")
+                    .header("User-Agent", "BPlayer-Android")
+                    .build()
+
+                val response = withContext(Dispatchers.IO) {
+                    okHttpClient.newCall(request).execute()
+                }
+
+                if (!response.isSuccessful) {
+                    _downloadState.value = UpdateDownloadState.Failed("Server returned HTTP ${response.code}")
+                    return@launch
+                }
+
+                val body = response.body
+                if (body == null) {
+                    _downloadState.value = UpdateDownloadState.Failed("Download payload was empty.")
+                    return@launch
+                }
+
+                val totalLength = if (body.contentLength() > 0) body.contentLength() else info.downloadSizeBytes
+                var bytesRead = 0L
+                val buffer = ByteArray(16 * 1024)
+
+                body.byteStream().use { input ->
+                    tempFile.outputStream().use { output ->
+                        var read: Int
+                        var lastEmitTime = 0L
+                        while (input.read(buffer).also { read = it } != -1) {
+                            output.write(buffer, 0, read)
+                            bytesRead += read
+
+                            val now = System.currentTimeMillis()
+                            if (now - lastEmitTime >= 120 || (totalLength > 0 && bytesRead == totalLength)) {
+                                lastEmitTime = now
+                                val progress = if (totalLength > 0) {
+                                    (bytesRead.toFloat() / totalLength.toFloat()).coerceIn(0f, 1f)
+                                } else 0f
+                                _downloadState.value = UpdateDownloadState.Downloading(
+                                    bytesDownloaded = bytesRead,
+                                    totalBytes = totalLength,
+                                    progress = progress,
+                                )
+                            }
+                        }
+                        output.flush()
+                    }
+                }
+
+                if (targetFile.exists()) targetFile.delete()
+                if (!tempFile.renameTo(targetFile)) {
+                    tempFile.copyTo(targetFile, overwrite = true)
+                    tempFile.delete()
+                }
+
+                if (!targetFile.exists() || targetFile.length() == 0L) {
+                    _downloadState.value = UpdateDownloadState.Failed("Saved APK file is invalid or empty.")
+                    return@launch
+                }
+
+                _downloadState.value = UpdateDownloadState.ReadyToInstall(targetFile)
+                withContext(Dispatchers.Main) {
+                    installApk(context, targetFile)
+                }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) {
+                    tempFile.delete()
+                    _downloadState.value = UpdateDownloadState.Idle
+                } else {
+                    _downloadState.value = UpdateDownloadState.Failed(e.message ?: "Network error downloading update")
+                }
+            }
+        }
+    }
+
+    /**
+     * Cancels an ongoing APK download and resets state to Idle.
+     */
+    fun cancelDownload() {
+        activeDownloadJob?.cancel()
+        activeDownloadJob = null
+        _downloadState.value = UpdateDownloadState.Idle
+    }
+
+    /**
+     * Resets download state to Idle (e.g. for retrying).
+     */
+    fun resetDownloadState() {
+        _downloadState.value = UpdateDownloadState.Idle
+    }
+
+    /**
+     * Launches the native Android package installer for the downloaded APK via FileProvider.
+     * On Android 8+, prompts for package install permission if not yet granted.
+     */
+    fun installApk(context: Context, apkFile: File) {
+        if (!apkFile.exists() || apkFile.length() == 0L) {
+            _downloadState.value = UpdateDownloadState.Failed("Downloaded installer file not found.")
+            return
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (!context.packageManager.canRequestPackageInstalls()) {
+                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                    return
+                }
+            }
+
+            val apkUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                apkFile,
+            )
+
+            val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(apkUri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(installIntent)
+        } catch (e: Exception) {
+            _downloadState.value = UpdateDownloadState.Failed("Failed to launch package installer: ${e.message}")
+        }
+    }
+
+    /**
+     * Fallback browser download in case the user prefers opening the web page.
      */
     fun openDownload(context: Context) {
         val targetUrl = _updateInfo.value.downloadUrl?.takeIf { it.isNotBlank() }
@@ -251,26 +434,26 @@ class AppUpdateManager @Inject constructor(
         } catch (_: Exception) { }
     }
 
-    fun isNewerVersion(remote: String, local: String): Boolean {
-        if (remote.isBlank() || local.isBlank()) return false
-        val cleanRemote = remote.removePrefix("v").removePrefix("V").substringBefore("-")
-        val cleanLocal = local.removePrefix("v").removePrefix("V").substringBefore("-")
-        if (cleanRemote == cleanLocal) return false
-
-        val rParts = cleanRemote.split(".").mapNotNull { it.toIntOrNull() }
-        val cParts = cleanLocal.split(".").mapNotNull { it.toIntOrNull() }
-
-        val maxLen = maxOf(rParts.size, cParts.size)
-        for (i in 0 until maxLen) {
-            val r = rParts.getOrElse(i) { 0 }
-            val c = cParts.getOrElse(i) { 0 }
-            if (r > c) return true
-            if (r < c) return false
-        }
-        return false
-    }
-
     companion object {
+        fun isNewerVersion(remote: String, local: String): Boolean {
+            if (remote.isBlank() || local.isBlank()) return false
+            val cleanRemote = remote.removePrefix("v").removePrefix("V").substringBefore("-")
+            val cleanLocal = local.removePrefix("v").removePrefix("V").substringBefore("-")
+            if (cleanRemote == cleanLocal) return false
+
+            val rParts = cleanRemote.split(".").mapNotNull { it.toIntOrNull() }
+            val cParts = cleanLocal.split(".").mapNotNull { it.toIntOrNull() }
+
+            val maxLen = maxOf(rParts.size, cParts.size)
+            for (i in 0 until maxLen) {
+                val r = rParts.getOrElse(i) { 0 }
+                val c = cParts.getOrElse(i) { 0 }
+                if (r > c) return true
+                if (r < c) return false
+            }
+            return false
+        }
+
         fun classifyAsset(name: String): ApkVariant {
             val lower = name.lowercase()
             return when {
